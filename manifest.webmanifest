@@ -1,0 +1,25 @@
+{
+  "name": "Nhật Ngữ Mỗi Ngày",
+  "short_name": "Nhật Ngữ",
+  "description": "Học tiếng Nhật N5–N1: từ vựng, kanji, kaiwa, bảng chữ cái",
+  "lang": "vi",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f5f9",
+  "theme_color": "#2c3f8f",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
