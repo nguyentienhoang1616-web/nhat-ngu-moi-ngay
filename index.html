@@ -46,6 +46,7 @@
   --again:#f0776b; --hard:#e2b453; --good:#5ccf8e; --easy:#74b3ff; color-scheme:dark;
 }
 html,body{height:100%}
+[hidden]{display:none!important}
 body{background:var(--paper);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.5;-webkit-tap-highlight-color:transparent}
 *{box-sizing:border-box}
 button{font:inherit;color:inherit}
@@ -206,6 +207,55 @@ details.how li{margin:4px 0}
 .mbtn.no{border-color:var(--again);background:color-mix(in srgb,var(--again) 18%,var(--surface))}
 .goin{width:100%;padding:14px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:20px;text-align:center}
 .goin:focus{border-color:var(--ai);outline:none}
+.flrow{display:flex;gap:8px;margin:4px 0 8px}
+.flrow input[type=search]{flex:1;min-width:0;padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:15px}
+.flrow select{padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:14px}
+.flopts{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);margin:2px 0 10px;align-items:center}
+.flopts label{display:flex;align-items:center;gap:5px;cursor:pointer}
+.flprog{font-size:13px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;margin-bottom:6px}
+.flbar{height:5px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:12px}
+.flbar i{display:block;height:100%;background:var(--good);transition:width .3s}
+.flstage{touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:grab;position:relative}
+.flstage.snap{transition:transform .25s ease,opacity .25s ease}
+.flcard{perspective:1200px;height:clamp(300px,calc(100dvh - 440px),460px)}
+.flmore{margin:2px 0 8px;font-size:13px;color:var(--muted)}
+.flmore summary{cursor:pointer;padding:4px 0}
+.flmore[open] summary{margin-bottom:6px}
+.flinner{position:relative;width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d}
+.flcard.flipped .flinner{transform:rotateY(180deg)}
+.flface{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:18px;border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;text-align:center;padding:46px 18px 34px;overflow-y:auto;box-shadow:0 6px 22px rgba(10,14,40,.08)}
+.flfront{background:var(--surface)}
+.flback{background:var(--ai-soft);transform:rotateY(180deg)}
+.flbody{margin:auto 0;width:100%;display:flex;flex-direction:column;align-items:center;gap:6px}
+.fltag{position:absolute;top:13px;left:14px;right:58px;text-align:left;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.flsay{position:absolute;top:8px;right:10px;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--paper);font-size:18px;cursor:pointer;z-index:3}
+.flhint{position:absolute;bottom:10px;left:0;right:0;font-size:12px;color:var(--muted)}
+.flterm{font-family:var(--f-card);font-weight:600;line-height:1.25;word-break:break-word}
+.ft1{font-size:84px}.ft2{font-size:58px}.ft3{font-size:40px}.ft4{font-size:28px}.ft5{font-size:21px}
+.flread{font-family:var(--f-jp);font-size:23px;color:var(--ai);font-weight:500;word-break:break-word}
+.flroma{font-size:16px;color:var(--hard);letter-spacing:.3px;word-break:break-word}
+.flmean{font-size:26px;font-weight:700;line-height:1.3}
+.flnote{width:100%;text-align:left;font-size:15px;background:var(--surface);border-radius:10px;padding:9px 12px;margin-top:4px}
+.flnote .jp{font-size:17px}
+.flsmall{font-size:13px;color:var(--muted)}
+.flbtns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+.flbtns button{padding:11px 4px;font-size:14px;white-space:nowrap;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;font-weight:600}
+.flbtns .no{color:var(--again);border-color:var(--again)}
+.flbtns .ok{color:var(--good);border-color:var(--good)}
+.flhelp{font-size:12px;color:var(--muted);margin-top:12px;line-height:1.6;text-align:center}
+.fldone{text-align:center;padding:36px 10px}
+.flstamp{position:absolute;top:18px;padding:4px 12px;border:3px solid;border-radius:8px;font-weight:800;font-size:20px;opacity:0;pointer-events:none;z-index:4;background:var(--surface)}
+.flstamp.ok{right:16px;color:var(--good);transform:rotate(12deg)}
+.flstamp.no{left:16px;color:var(--again);transform:rotate(-12deg)}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 10px}
+.mode{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:9px 10px;text-align:left;cursor:pointer}
+.mode b{display:block;font-size:14px}
+.mode span{font-size:12px;color:var(--muted)}
+.mode.on{border-color:var(--ai);background:var(--ai-soft)}
+.mode.on b{color:var(--ai)}
+.subchip{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--ai-soft);color:var(--ai);border-radius:12px;padding:8px 12px;margin:6px 0;font-weight:600;font-size:14px}
+.subchip button{border:none;background:transparent;color:var(--ai);font-size:16px;cursor:pointer}
+.todaylink{display:flex;align-items:center;justify-content:space-between;gap:8px;text-decoration:none;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:6px 0 10px;font-size:14px}
 @media (prefers-reduced-motion: no-preference){ .card{transition:transform .15s} .card:active{transform:scale(.99)} }
 @media (min-width:600px){ .big.s1{font-size:120px} }
 </style>
@@ -220,7 +270,7 @@ details.how li{margin:4px 0}
   </header>
   <main id="view"></main>
   <nav class="tabs" id="tabs">
-    <a href="#hom-nay" data-v="hom-nay"><b>今</b>Hôm nay</a>
+    <a href="#lat-the" data-v="lat-the"><b>札</b>Lật thẻ</a>
     <a href="#tu-vung" data-v="tu-vung"><b>語</b>Từ vựng</a>
     <a href="#kanji" data-v="kanji"><b>字</b>Kanji</a>
     <a href="#kaiwa" data-v="kaiwa"><b>話</b>Kaiwa</a>
@@ -299,10 +349,11 @@ const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ
 const LS = 'nnmn-v1';
 const DEFAULTS = {newV:10, newK:5, newP:5, romaji:true, autoplay:true, rate:0.9, dir:'jp'};
 const dayNum = () => { const d = new Date(); return Math.floor((d.getTime() - d.getTimezoneOffset() * 60000) / 86400000); };
-function fresh(){ return {cards:{}, meta:{settings:{...DEFAULTS}, daily:{day:dayNum(), nv:0, nk:0, np:0, rev:0}, streak:{last:-1, count:0}, updated:0}}; }
+function fresh(){ return {cards:{}, mk:{}, meta:{settings:{...DEFAULTS}, daily:{day:dayNum(), nv:0, nk:0, np:0, rev:0}, streak:{last:-1, count:0}, updated:0}}; }
 let S = fresh();
 try { const t = localStorage.getItem(LS); if (t) { const o = JSON.parse(t); if (o && o.cards && o.meta) S = o; } } catch (e) {}
 S.meta.settings = {...DEFAULTS, ...S.meta.settings};
+if (!S.mk) S.mk = {};
 const ST = () => S.meta.settings;
 function bump(n){ const h = S.meta.hist || (S.meta.hist = {}); const t = dayNum(); h[t] = (h[t] || 0) + (n || 1); for (const k of Object.keys(h)) if (+k < t - 120) delete h[k]; }
 function rollDay(){ const t = dayNum(); if (S.meta.daily.day !== t) S.meta.daily = {day:t, nv:0, nk:0, np:0, rev:0}; }
@@ -325,7 +376,7 @@ async function flush(){
   for (const name of todo) {
     try {
       if (name === 'meta') await REM.doc('meta').set({settings:S.meta.settings, daily:S.meta.daily, streak:S.meta.streak, hist:S.meta.hist || {}, updated:S.meta.updated});
-      else { const part = {}; for (const [id, c] of Object.entries(S.cards)) if (shardOf(id) === name) part[id] = c; await REM.doc(name).set({cards:part}); }
+      else { const part = {}, pm = {}; for (const [id, c] of Object.entries(S.cards)) if (shardOf(id) === name) part[id] = c; for (const [id, c] of Object.entries(S.mk)) if (shardOf(id) === name) pm[id] = c; await REM.doc(name).set({cards:part, mk:pm}); }
     } catch (e) { dirty.add(name); }
   }
   flushing = false;
@@ -344,14 +395,15 @@ async function initSync(){
       const body = d.data(); if (!body) continue;
       if (d.id === 'meta') {
         if ((body.updated || 0) > (S.meta.updated || 0)) { S.meta.settings = {...DEFAULTS, ...body.settings}; S.meta.streak = body.streak || S.meta.streak; if (body.hist) S.meta.hist = body.hist; if (body.daily && body.daily.day === dayNum()) S.meta.daily = body.daily; changed = true; }
-      } else if (body.cards) {
-        for (const [id, c] of Object.entries(body.cards)) { const mine = S.cards[id]; if (!mine || (c[5] || 0) > (mine[5] || 0)) { S.cards[id] = c; changed = true; } }
+      } else {
+        for (const [id, c] of Object.entries(body.cards || {})) { const mine = S.cards[id]; if (!mine || (c[5] || 0) > (mine[5] || 0)) { S.cards[id] = c; changed = true; } }
+        for (const [id, c] of Object.entries(body.mk || {})) { const mine = S.mk[id]; if (!mine || (c[1] || 0) > (mine[1] || 0)) { S.mk[id] = c; changed = true; } }
       }
     }
     REM = col; syncLabel = 'Đồng bộ với tài khoản Claude của bạn';
     if (changed) { try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {} route(); }
     // đẩy phần máy này có mà trên mạng chưa có
-    dirty.add('meta'); Object.keys(S.cards).forEach(id => dirty.add(shardOf(id))); flush();
+    dirty.add('meta'); Object.keys(S.cards).concat(Object.keys(S.mk)).forEach(id => dirty.add(shardOf(id))); flush();
   } catch (e) { /* vẫn học được, chỉ lưu trên máy */ }
 }
 
@@ -360,7 +412,18 @@ async function initSync(){
 const st = id => S.cards[id];
 const isDue = id => { const c = st(id); return c && c[0] <= dayNum(); };
 const isKnown = id => { const c = st(id); return c && c[1] >= 21; };
-const stateDot = id => { const c = st(id); return !c ? '' : c[1] >= 21 ? 'k' : 'l'; };
+const stateDot = id => { const m = S.mk[id]; if (m) return m[0] ? 'k' : 'l'; return st(id) ? 'l' : ''; };
+// thuộc (1) / chưa thuộc (0): [dấu, lúc đánh dấu (ms), số lần chưa thuộc]
+function markOnly(id, ok){ const o = S.mk[id]; S.mk[id] = [ok ? 1 : 0, Date.now(), (o ? o[2] : 0) + (ok ? 0 : 1)]; }
+function swipeMark(id, ok){
+  rollDay(); markOnly(id, ok);
+  const wasNew = !S.cards[id]; S.cards[id] = nextOf(S.cards[id], ok ? 2 : 0);
+  const m = S.meta, t = dayNum(), d = deckOf(id);
+  if (wasNew) m.daily['n' + d] = (m.daily['n' + d] || 0) + 1;
+  m.daily.rev++; bump();
+  if (m.streak.last !== t) { m.streak.count = m.streak.last === t - 1 ? m.streak.count + 1 : 1; m.streak.last = t; }
+  save([id]);
+}
 function nextOf(c, g){
   let [due, ivl, ease, reps, lapses] = c || [0, 0, 250, 0, 0];
   if (g === 0) { reps = 0; lapses++; ivl = 0; ease = Math.max(130, ease - 20); }
@@ -413,10 +476,10 @@ let vstate = {vLv:'N5', vPage:0, kLv:'N5', kPage:0, kana:'h', q:''};
 try { Object.assign(vstate, JSON.parse(localStorage.getItem('nnmn-ui') || '{}')); } catch (e) {}
 const saveUi = () => { try { localStorage.setItem('nnmn-ui', JSON.stringify(vstate)); } catch (e) {} };
 function route(){
-  const h = (location.hash || '#hom-nay').slice(1);
-  const name = views[h] ? h : 'hom-nay';
+  const h = (location.hash || '#lat-the').slice(1);
+  const name = views[h] ? h : 'lat-the';
   $('#modal').hidden = true;
-  document.querySelectorAll('#tabs a').forEach(a => a.classList.toggle('on', a.dataset.v === name || (name.startsWith('kaiwa') && a.dataset.v === 'kaiwa')));
+  document.querySelectorAll('#tabs a').forEach(a => a.classList.toggle('on', a.dataset.v === name || (name.startsWith('kaiwa') && a.dataset.v === 'kaiwa') || (name === 'hom-nay' && a.dataset.v === 'lat-the')));
   $('#view').innerHTML = views[name]();
   $('#view').scrollTop = 0;
   if (views[name].after) views[name].after();
@@ -493,7 +556,7 @@ views['tu-vung'] = () => {
   <div class="chips">${LV_V.map(l => `<button class="chip ${l === lv ? 'on' : ''}" data-lv="${l}">${l} · ${V.filter(x => x.lv === l).length}</button>`).join('')}</div>
   <div class="panel" style="margin-top:8px"><div class="row" style="justify-content:space-between"><span><b>${lv}</b>: đã học ${pr.learned}/${pr.total} · thuộc ${pr.known} · đến hạn ${pr.due}</span></div><div class="bar"><i style="width:${(pr.learned / pr.total * 100).toFixed(1)}%"></i></div></div>
   <div class="pager"><button class="btn ghost" id="pv" ${vstate.vPage ? '' : 'disabled'}>‹</button><b>Bài ${vstate.vPage + 1} / ${pages} · đã học ${pp.learned}/${pp.total}</b><button class="btn ghost" id="nx" ${vstate.vPage < pages - 1 ? '' : 'disabled'}>›</button></div>
-  <div class="row" style="margin-bottom:10px"><button class="btn pri" id="learnPage">Học bài này</button><button class="btn" id="quizPage">Bài tập · ôn lại bài này</button><button class="btn ghost" id="quizLv">Bài tập cả ${lv}</button></div>
+  <div class="row" style="margin-bottom:10px"><button class="btn pri" id="learnPage">▶ Lật thẻ bài này</button><button class="btn" id="quizPage">Bài tập · ôn lại</button><button class="btn ghost" id="quizLv">Bài tập cả ${lv}</button></div>
   <div class="list">${pg.map(x => `<div class="item" data-open="${x.id}"><span class="dot ${stateDot(x.id)}"></span><div style="min-width:0"><div class="w">${esc(x.w)}</div>${x.r !== x.w ? `<div class="r">${esc(x.r)}</div>` : ''}</div><div class="m">${esc(x.vi || '')}</div>${sayBtn(x.r)}</div>`).join('')}</div>`;
 };
 views['tu-vung'].after = () => {
@@ -501,7 +564,7 @@ views['tu-vung'].after = () => {
   const pageIds = () => V.filter(x => x.lv === vstate.vLv).slice(vstate.vPage * PER_V, (vstate.vPage + 1) * PER_V).map(x => x.id);
   $('#pv').onclick = () => { vstate.vPage--; saveUi(); route(); };
   $('#nx').onclick = () => { vstate.vPage++; saveUi(); route(); };
-  $('#learnPage').onclick = () => { const ids = pageIds(), t = dayNum(); startSession(mix(ids.filter(id => S.cards[id] && S.cards[id][0] <= t), ids.filter(id => !S.cards[id])), 'Từ vựng ' + vstate.vLv + ' · bài ' + (vstate.vPage + 1), true); };
+  $('#learnPage').onclick = () => openFlash(pageIds(), 'Từ vựng ' + vstate.vLv + ' · bài ' + (vstate.vPage + 1));
   $('#quizPage').onclick = () => exChooser(pageIds(), 'Từ vựng ' + vstate.vLv + ' · bài ' + (vstate.vPage + 1));
   $('#quizLv').onclick = () => exChooser(V.filter(x => x.lv === vstate.vLv).map(x => x.id), 'Từ vựng cả ' + vstate.vLv);
   bindOpen();
@@ -519,7 +582,7 @@ views['kanji'] = () => {
   <div class="chips">${LV_K.map(l => `<button class="chip ${l === lv ? 'on' : ''}" data-klv="${l}">${l} · ${K.filter(x => x.lv === l).length}</button>`).join('')}</div>
   <div class="panel" style="margin-top:8px"><b>${lv}</b>: đã học ${pr.learned}/${pr.total} · thuộc ${pr.known} · đến hạn ${pr.due}<div class="bar"><i style="width:${(pr.learned / pr.total * 100).toFixed(1)}%"></i></div></div>
   <div class="pager"><button class="btn ghost" id="pv" ${vstate.kPage ? '' : 'disabled'}>‹</button><b>Bài ${vstate.kPage + 1} / ${pages}</b><button class="btn ghost" id="nx" ${vstate.kPage < pages - 1 ? '' : 'disabled'}>›</button></div>
-  <div class="row" style="margin-bottom:10px"><button class="btn pri" id="learnPage">Học bài này</button><button class="btn" id="quizPage">Bài tập · ôn lại bài này</button><button class="btn ghost" id="quizLv">Bài tập cả ${lv}</button></div>
+  <div class="row" style="margin-bottom:10px"><button class="btn pri" id="learnPage">▶ Lật thẻ bài này</button><button class="btn" id="quizPage">Bài tập · ôn lại</button><button class="btn ghost" id="quizLv">Bài tập cả ${lv}</button></div>
   <div class="kgrid">${pg.map(x => `<div class="ktile" data-open="${x.id}"><span class="dot ${stateDot(x.id)}"></span><b>${esc(x.k)}</b><span>${esc((x.vi || '').split(',')[0])}</span></div>`).join('')}</div>`;
 };
 views['kanji'].after = () => {
@@ -527,7 +590,7 @@ views['kanji'].after = () => {
   const pageIds = () => K.filter(x => x.lv === vstate.kLv).slice(vstate.kPage * PER_K, (vstate.kPage + 1) * PER_K).map(x => x.id);
   $('#pv').onclick = () => { vstate.kPage--; saveUi(); route(); };
   $('#nx').onclick = () => { vstate.kPage++; saveUi(); route(); };
-  $('#learnPage').onclick = () => { const ids = pageIds(), t = dayNum(); startSession(mix(ids.filter(id => S.cards[id] && S.cards[id][0] <= t), ids.filter(id => !S.cards[id])), 'Kanji ' + vstate.kLv + ' · bài ' + (vstate.kPage + 1), true); };
+  $('#learnPage').onclick = () => openFlash(pageIds(), 'Kanji ' + vstate.kLv + ' · bài ' + (vstate.kPage + 1));
   $('#quizPage').onclick = () => exChooser(pageIds(), 'Kanji ' + vstate.kLv + ' · bài ' + (vstate.kPage + 1));
   $('#quizLv').onclick = () => exChooser(K.filter(x => x.lv === vstate.kLv).map(x => x.id), 'Kanji cả ' + vstate.kLv);
   bindOpen();
@@ -541,7 +604,7 @@ P.forEach((s, i) => {
   views[name] = () => {
     const mode = vstate['km' + i] || '';
     return `<p class="small" style="margin:6px 0 0"><a href="#kaiwa" style="color:var(--ai)">‹ Kaiwa</a></p><h2>${esc(s.title)}</h2>
-    <div class="row" style="margin:8px 0 10px"><button class="btn pri" id="kLearn">Học thẻ câu</button><button class="btn" id="kQuiz">Bài tập · ôn lại</button></div>
+    <div class="row" style="margin:8px 0 10px"><button class="btn pri" id="kLearn">▶ Lật thẻ câu</button><button class="btn" id="kQuiz">Bài tập · ôn lại</button></div>
     <div class="chips"><button class="chip ${mode === '' ? 'on' : ''}" data-km="">Hiện hết</button><button class="chip ${mode === 'hide-vi' ? 'on' : ''}" data-km="hide-vi">Che tiếng Việt</button><button class="chip ${mode === 'hide-jp' ? 'on' : ''}" data-km="hide-jp">Che tiếng Nhật (tự nói)</button></div>
     <p class="hint">Chế độ che: tự đoán / tự nói trước, rồi bấm vào chỗ mờ để xem.</p>
     <h3>Câu hay dùng</h3>
@@ -551,7 +614,7 @@ P.forEach((s, i) => {
   };
   views[name].after = () => {
     const ids = PH.filter(x => x.si === i).map(x => x.id);
-    $('#kLearn').onclick = () => { const t = dayNum(); startSession(mix(ids.filter(id => S.cards[id] && S.cards[id][0] <= t), ids.filter(id => !S.cards[id]).slice(0, 15)), s.title, true); };
+    $('#kLearn').onclick = () => openFlash(ids, s.title);
     $('#kQuiz').onclick = () => exChooser(ids, s.title);
     document.querySelectorAll('[data-km]').forEach(b => b.onclick = () => { vstate['km' + i] = b.dataset.km; saveUi(); route(); });
     document.querySelectorAll('[data-dlg]').forEach(b => b.onclick = () => sayLines(s.dialogs[+b.dataset.dlg].lines.map(l => l[2])));
@@ -620,7 +683,7 @@ views['cai-dat'].after = () => {
   $('#sAu').onchange = e => { s.autoplay = e.target.checked; save(); };
   $('#sRate').onchange = e => { s.rate = parseFloat(e.target.value); save(); say('こんにちは'); };
   $('#sDir').onchange = e => { s.dir = e.target.value; save(); };
-  $('#reset').onclick = () => { if (!resetArmed) { resetArmed = true; route(); return; } resetArmed = false; const keep = S.meta.settings; const ids = Object.keys(S.cards); S = fresh(); S.meta.settings = keep; save(ids); toast('Đã xoá tiến độ'); route(); };
+  $('#reset').onclick = () => { if (!resetArmed) { resetArmed = true; route(); return; } resetArmed = false; const keep = S.meta.settings; const ids = Object.keys(S.cards).concat(Object.keys(S.mk)); S = fresh(); S.meta.settings = keep; save(ids); toast('Đã xoá tiến độ'); route(); };
 };
 
 /* ================= Thẻ chi tiết ================= */
@@ -702,6 +765,7 @@ function grade(g){
   if (!SES || !SES.flipped) return;
   rollDay();
   const id = SES.queue.shift(), wasNew = !S.cards[id], d = deckOf(id);
+  markOnly(id, g >= 2);
   if (SES.cram) {
     bump();
     if (g === 0) { const c = S.cards[id]; if (c) { c[0] = dayNum(); c[4]++; c[5] = Date.now(); } SES.again++; SES.queue.splice(Math.min(3, SES.queue.length), 0, id); }
@@ -759,7 +823,7 @@ function showQ(){
     if (nghe) $('#nheHint').innerHTML = `<span class="jp" style="font-size:22px;color:var(--ink)">${esc(qText(q.x))}</span>${d === 'v' && q.x.r !== q.x.w ? ' <span class="jp">' + esc(q.x.r) + '</span>' : ''}`;
     const pick = q.opts[+b.dataset.o], ok = pick.id === q.x.id;
     document.querySelectorAll('[data-o]').forEach((bb, j) => { if (q.opts[j].id === q.x.id) bb.classList.add('ok'); else if (bb === b) bb.classList.add('no'); });
-    bump(); if (ok) Q.score++; else { Q.wrong.push(q.x); const c = S.cards[q.x.id]; if (c) { c[0] = dayNum(); c[4]++; } } save([q.x.id]);
+    bump(); if (ok) Q.score++; else { Q.wrong.push(q.x); markOnly(q.x.id, false); const c = S.cards[q.x.id]; if (c) { c[0] = dayNum(); c[4]++; } } save([q.x.id]);
     say(d === 'v' ? q.x.r : qText(q.x));
     foot.innerHTML = `<button class="btn pri wide" id="nextQ">${ok ? 'Đúng rồi · ' : 'Chưa đúng · '}Câu tiếp</button>`;
     $('#nextQ').onclick = () => { Q.answered = false; Q.i++; showQ(); };
@@ -790,12 +854,191 @@ function startKanaQuiz(set){
   show();
 }
 
+/* ================= Lật thẻ (kiểu app Thẻ Nhật) ================= */
+const FL_DECKS = [['v', 'Từ vựng', () => V.length], ['k', 'Kanji', () => K.length], ['p', 'Kaiwa', () => PH.length]];
+const FL_MODES = [
+  ['moi', '🆕 Thẻ mới', 'thẻ chưa xem lần nào', id => !S.mk[id]],
+  ['chua', '🔁 Chưa thuộc', 'thẻ đã vuốt trái', id => S.mk[id] && S.mk[id][0] === 0],
+  ['thuoc', '✓ Đã thuộc', 'kiểm tra lại thẻ đã thuộc', id => S.mk[id] && S.mk[id][0] === 1],
+  ['all', '📚 Tất cả', 'cả bộ, theo thứ tự', () => true],
+];
+const fv = Object.assign({flDeck:'v', flGroup:'all', flMode:'moi', flRound:20, flShuffle:false, flRead:true, flRoma:true, flRev:false}, vstate);
+Object.assign(vstate, fv);
+let FL = {queue:[], flipped:false, ok:0, no:new Set()};
+function flGroups(dk){
+  if (dk === 'v') return LV_V.map(l => [l, l]);
+  if (dk === 'k') return LV_K.map(l => [l, l]);
+  return P.map((s2, i) => [String(i), s2.title]);
+}
+function flBase(){
+  if (vstate.flSub) return vstate.flSub.ids;
+  const dk = vstate.flDeck, g = vstate.flGroup;
+  if (dk === 'v') return V.filter(x => g === 'all' || x.lv === g).map(x => x.id);
+  if (dk === 'k') return K.filter(x => g === 'all' || x.lv === g).map(x => x.id);
+  return PH.filter(x => g === 'all' || String(x.si) === g).map(x => x.id);
+}
+function flMatch(id, q){
+  if (!q) return true;
+  const x = BY.get(id), d = deckOf(id), ql = norm(q), qh = k2h(q);
+  if (d === 'v') return x.w.includes(q) || x.r.includes(qh) || norm(x.vi).includes(ql) || roOf(x).includes(ql.replace(/[\s']/g, ''));
+  if (d === 'k') return x.k === q || norm(x.vi).includes(ql) || norm(x.hv).includes(ql);
+  return x.jp.includes(q) || x.kana.includes(qh) || norm(x.vi).includes(ql) || norm(x.ro).includes(ql);
+}
+function flPool(){
+  const q = (vstate.flQ || '').trim(), base = flBase().filter(id => flMatch(id, q));
+  const mode = FL_MODES.find(m => m[0] === vstate.flMode) || FL_MODES[0];
+  return q ? base : base.filter(mode[3]);
+}
+function openFlash(ids, title){
+  vstate.flSub = {title, ids:ids.slice(0, 3000)}; vstate.flMode = 'all'; vstate.flQ = ''; saveUi();
+  if (location.hash === '#lat-the') route(); else location.hash = 'lat-the';
+}
+views['lat-the'] = () => {
+  const sub = vstate.flSub, dk = vstate.flDeck, base = flBase();
+  const tp = todayPlan(), todayN = tp.due.v + tp.due.k + tp.due.p + tp.nw.v + tp.nw.k + tp.nw.p;
+  const cnt = FL_MODES.map(m => base.filter(m[3]).length);
+  const known = base.filter(id => S.mk[id] && S.mk[id][0] === 1).length;
+  return `<div class="row" style="justify-content:space-between;margin:6px 0 8px;flex-wrap:nowrap"><h2 style="margin:0">Lật thẻ</h2><a class="todaylink" style="margin:0" href="#hom-nay"><span>📅 Ôn theo lịch: <b>${todayN}</b></span><span class="muted">›</span></a></div>
+  ${sub ? `<div class="subchip"><span>📌 ${esc(sub.title)} · ${sub.ids.length} thẻ</span><button id="flSubX" aria-label="Bỏ chọn">✕</button></div>` : `
+  <div class="chips">${FL_DECKS.map(([k, n, c]) => `<button class="chip ${dk === k ? 'on' : ''}" data-fd="${k}">${n} · ${c().toLocaleString('vi-VN')}</button>`).join('')}</div>
+  <div class="chips">${[['all', 'Tất cả']].concat(flGroups(dk)).map(([k, n]) => `<button class="chip ${vstate.flGroup === k ? 'on' : ''}" data-fg="${esc(k)}">${esc(n)}</button>`).join('')}</div>`}
+  <div class="chips">${FL_MODES.map((m, i) => `<button class="chip ${vstate.flMode === m[0] ? 'on' : ''}" data-fm="${m[0]}" title="${esc(m[2])}">${m[1]} · ${cnt[i].toLocaleString('vi-VN')}</button>`).join('')}</div>
+  <details class="flmore"${vstate.flQ ? ' open' : ''}><summary>⚙ Tìm, số thẻ mỗi vòng, cách hiện thẻ</summary>
+  <div class="flrow"><input type="search" id="flQ" placeholder="Tìm chữ / cách đọc / nghĩa…" value="${esc(vstate.flQ || '')}" autocomplete="off">
+    <select id="flRound" aria-label="Số thẻ mỗi vòng">${[[20, 'Vòng 20'], [50, 'Vòng 50'], [100, 'Vòng 100'], [0, 'Hết bộ']].map(([v, n]) => `<option value="${v}" ${+vstate.flRound === v ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
+  <div class="flopts">
+    <label><input type="checkbox" id="flShuffle" ${vstate.flShuffle ? 'checked' : ''}> Trộn</label>
+    <label><input type="checkbox" id="flRead" ${vstate.flRead ? 'checked' : ''}> Hiện cách đọc mặt trước</label>
+    <label><input type="checkbox" id="flRoma" ${vstate.flRoma ? 'checked' : ''}> Hiện romaji</label>
+    <label><input type="checkbox" id="flRev" ${vstate.flRev ? 'checked' : ''}> Mặt trước tiếng Việt</label>
+  </div></details>
+  <div class="flprog"><span id="flLeft"></span><span>Đã thuộc ${known.toLocaleString('vi-VN')} / ${base.length.toLocaleString('vi-VN')}</span></div>
+  <div class="flbar"><i style="width:${(base.length ? known / base.length * 100 : 0).toFixed(2)}%"></i></div>
+  <div id="flArea"></div>
+  <div class="flbtns" id="flBtns"><button class="no" id="flNo">✗ Chưa thuộc</button><button id="flFlip">↺ Lật thẻ</button><button class="ok" id="flOk">✓ Thuộc rồi</button></div>
+  <div class="flhelp">Bấm vào thẻ để lật · 🔊 nghe đọc · vuốt phải = thuộc rồi, vuốt trái = chưa thuộc (thẻ quay lại cuối vòng).<br>Bàn phím: Space lật · ← chưa thuộc · → thuộc rồi · S nghe.</div>`;
+};
+views['lat-the'].after = () => {
+  document.querySelectorAll('[data-fd]').forEach(b => b.onclick = () => { vstate.flDeck = b.dataset.fd; vstate.flGroup = 'all'; saveUi(); route(); });
+  document.querySelectorAll('[data-fg]').forEach(b => b.onclick = () => { vstate.flGroup = b.dataset.fg; saveUi(); route(); });
+  document.querySelectorAll('[data-fm]').forEach(b => b.onclick = () => { vstate.flMode = b.dataset.fm; saveUi(); route(); });
+  if ($('#flSubX')) $('#flSubX').onclick = () => { vstate.flSub = null; vstate.flMode = 'moi'; saveUi(); route(); };
+  $('#flRound').onchange = e => { vstate.flRound = +e.target.value; saveUi(); flRebuild(); };
+  ['flShuffle', 'flRead', 'flRoma', 'flRev'].forEach(k => $('#' + k).onchange = e => { vstate[k] = e.target.checked; saveUi(); k === 'flShuffle' ? flRebuild() : flRender(); });
+  let qt; $('#flQ').oninput = e => { clearTimeout(qt); qt = setTimeout(() => { vstate.flQ = e.target.value; saveUi(); flRebuild(); }, 300); };
+  $('#flFlip').onclick = flFlip; $('#flOk').onclick = () => flFly(1); $('#flNo').onclick = () => flFly(-1);
+  flRebuild();
+};
+function flRebuild(){
+  let list = flPool().slice();
+  if (vstate.flShuffle) shuffle(list);
+  const n = +vstate.flRound;
+  FL = {queue:n ? list.slice(0, n) : list, flipped:false, ok:0, no:new Set(), total:0};
+  FL.total = FL.queue.length;
+  flRender();
+}
+const flSize = t => { const n = [...t].length; return n <= 2 ? 'ft1' : n <= 4 ? 'ft2' : n <= 8 ? 'ft3' : n <= 16 ? 'ft4' : 'ft5'; };
+function flFaces(id){
+  const x = BY.get(id), d = deckOf(id), rev = vstate.flRev && d !== 'k', ro = vstate.flRoma, rd = vstate.flRead;
+  let jp = '', vi = '', more = '', speak = '', tag = '';
+  if (d === 'v') {
+    speak = x.r; tag = 'Từ vựng · ' + x.lv;
+    jp = `<div class="flterm ${flSize(x.w)}">${esc(x.w)}</div>${x.r !== x.w ? `<div class="flread">${esc(x.r)}</div>` : ''}${ro ? `<div class="flroma">${esc(romaji(x.r))}</div>` : ''}`;
+    vi = `<div class="flmean">${esc(x.vi)}</div><div class="flsmall">${esc(x.loai || '')}${hvOf(x.w) ? ' · Hán Việt: ' + esc(hvOf(x.w)) : ''}</div>`;
+    more = x.vd ? `<div class="flnote"><div class="jp">${esc(x.vd)}</div>${x.vdk && x.vdk !== x.vd ? `<div class="flsmall jp">${esc(x.vdk)}</div>` : ''}<div>${esc(x.vdv)}</div></div>` : '';
+  } else if (d === 'k') {
+    speak = (x.tu && x.tu[0]) ? x.tu[0].split('|')[1] : x.k; tag = 'Kanji · ' + x.lv + ' · ' + x.st + ' nét';
+    jp = `<div class="flterm ft1">${esc(x.k)}</div>`;
+    vi = `<div class="flmean">${esc(x.vi)}</div><div class="flsmall">Hán Việt: <b>${esc(x.hv)}</b></div><div class="flsmall jp">On: ${esc(onKata(x.on)) || '—'} · Kun: ${esc(x.kun) || '—'}</div>`;
+    more = (x.nho ? `<div class="flnote">💡 ${esc(x.nho)}</div>` : '') + ((x.tu || []).length ? `<div class="flnote">${x.tu.map(t2 => { const [w, r, m] = t2.split('|'); return `<div><span class="jp" style="font-size:17px">${esc(w)}</span> <span class="flsmall jp">${esc(r)}</span> — ${esc(m)}</div>`; }).join('')}</div>` : '');
+  } else {
+    speak = x.jp; tag = 'Kaiwa · ' + x.title;
+    jp = `<div class="flterm ${flSize(x.jp)}" style="font-family:var(--f-jp);font-weight:600">${esc(x.jp)}</div>${x.kana !== x.jp ? `<div class="flread" style="font-size:17px">${esc(x.kana)}</div>` : ''}${ro && x.ro ? `<div class="flroma">${esc(x.ro)}</div>` : ''}`;
+    vi = `<div class="flmean" style="font-size:22px">${esc(x.vi)}</div>`;
+    more = `<div class="flsmall"><span class="tag ${x.ai === 'mình nói' ? 'me' : ''}">${esc(x.ai)}</span><span class="tag">${esc(x.muc)}</span></div>${x.ghi ? `<div class="flnote">${esc(x.ghi)}</div>` : ''}`;
+  }
+  let front, back;
+  if (rev) { front = vi; back = jp + more; }
+  else {
+    front = d === 'k' ? jp : (rd ? jp : jp.replace(/<div class="flread"[\s\S]*?<\/div>/, '').replace(/<div class="flroma">[\s\S]*?<\/div>/, ''));
+    back = vi + more;
+  }
+  return {front, back, speak, tag};
+}
+function flRender(){
+  const area = $('#flArea'); if (!area) return;
+  const left = $('#flLeft');
+  if (!FL.queue.length) {
+    $('#flBtns').hidden = true; if (left) left.textContent = 'Hết vòng';
+    const pool = flPool().length, chuaN = flBase().filter(id => S.mk[id] && S.mk[id][0] === 0).length;
+    area.innerHTML = `<div class="fldone panel"><div class="big s2">${FL.total ? '🎉' : '📭'}</div><h2>${FL.total ? 'Xong vòng này' : 'Không có thẻ nào ở chế độ này'}</h2>${FL.total ? `<p>Thuộc ${FL.ok} · chưa thuộc ${FL.no.size}.</p>` : `<p class="muted">Chọn chế độ khác ở trên.</p>`}
+      <div class="row" style="justify-content:center;margin-top:10px">${pool ? '<button class="btn pri" id="flNext">Vòng tiếp</button>' : ''}${chuaN && vstate.flMode !== 'chua' ? `<button class="btn" id="flChua">🔁 Xem lại ${chuaN} thẻ chưa thuộc</button>` : ''}</div></div>`;
+    if ($('#flNext')) $('#flNext').onclick = () => route();
+    if ($('#flChua')) $('#flChua').onclick = () => { vstate.flMode = 'chua'; saveUi(); route(); };
+    return;
+  }
+  $('#flBtns').hidden = false;
+  if (left) left.textContent = 'Còn ' + FL.queue.length + ' thẻ trong vòng';
+  const id = FL.queue[0], f = flFaces(id), m = S.mk[id];
+  const st2 = m ? (m[0] ? ' · ✓ đã thuộc' : ' · ✗ chưa thuộc' + (m[2] > 1 ? ' (' + m[2] + ' lần)' : '')) : ' · mới';
+  area.innerHTML = `<div class="flstage" id="flStage"><div class="flstamp ok" id="flSOk">THUỘC</div><div class="flstamp no" id="flSNo">CHƯA</div>
+    <div class="flcard ${FL.flipped ? 'flipped' : ''}" id="flCard"><div class="flinner">
+      <div class="flface flfront"><div class="fltag">${esc(f.tag + st2)}</div><button class="flsay" data-fsay aria-label="Nghe đọc">🔊</button><div class="flbody">${f.front}</div><div class="flhint">bấm để lật</div></div>
+      <div class="flface flback"><div class="fltag">${esc(f.tag)}</div><button class="flsay" data-fsay aria-label="Nghe đọc">🔊</button><div class="flbody">${f.back}</div></div>
+    </div></div></div>`;
+  area.querySelectorAll('[data-fsay]').forEach(b => { b.addEventListener('pointerdown', e => e.stopPropagation()); b.addEventListener('click', e => { e.stopPropagation(); say(f.speak); }); });
+  flDrag();
+}
+function flFlip(){ if (!FL.queue.length) return; FL.flipped = !FL.flipped; const c = $('#flCard'); if (c) c.classList.toggle('flipped', FL.flipped); if (FL.flipped && ST().autoplay) { const f = flFaces(FL.queue[0]); if (vstate.flRev) say(f.speak); } }
+function flAnswer(ok){
+  if (!FL.queue.length) return;
+  const id = FL.queue.shift();
+  swipeMark(id, ok);
+  if (ok) { FL.ok++; FL.no.delete(id); } else { FL.no.add(id); FL.queue.push(id); }
+  FL.flipped = false; flRender();
+}
+function flFly(dir){
+  const s2 = $('#flStage'); if (!s2) return flAnswer(dir > 0);
+  s2.classList.add('snap'); s2.style.transform = 'translateX(' + (dir * 480) + 'px) rotate(' + (dir * 16) + 'deg)'; s2.style.opacity = '0';
+  setTimeout(() => flAnswer(dir > 0), 230);
+}
+function flDrag(){
+  const s2 = $('#flStage'); if (!s2) return;
+  let sx = 0, sy = 0, dx = 0, down = false, moved = false;
+  const sOk = $('#flSOk'), sNo = $('#flSNo');
+  s2.addEventListener('pointerdown', e => { down = true; moved = false; sx = e.clientX; sy = e.clientY; dx = 0; s2.classList.remove('snap'); });
+  s2.addEventListener('pointermove', e => {
+    if (!down) return;
+    dx = e.clientX - sx;
+    if (!moved && Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(e.clientY - sy)) { moved = true; try { s2.setPointerCapture(e.pointerId); } catch (x) {} }
+    if (moved) { s2.style.transform = 'translateX(' + dx + 'px) rotate(' + (dx / 22) + 'deg)'; sOk.style.opacity = dx > 0 ? Math.min(1, dx / 90) : 0; sNo.style.opacity = dx < 0 ? Math.min(1, -dx / 90) : 0; }
+  });
+  const end = e => {
+    if (!down) return; down = false;
+    if (!moved) { if (Math.abs(e.clientY - sy) < 10) flFlip(); return; }
+    if (dx > 90) return flFly(1);
+    if (dx < -90) return flFly(-1);
+    s2.classList.add('snap'); s2.style.transform = ''; sOk.style.opacity = 0; sNo.style.opacity = 0;
+  };
+  s2.addEventListener('pointerup', end);
+  s2.addEventListener('pointercancel', () => { down = false; s2.classList.add('snap'); s2.style.transform = ''; sOk.style.opacity = 0; sNo.style.opacity = 0; });
+}
+document.addEventListener('keydown', e => {
+  if ((location.hash || '#lat-the') !== '#lat-the' || SES || !$('#modal').hidden || !$('#flArea')) return;
+  if (e.target.matches('input,select,textarea')) return;
+  if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); flFlip(); }
+  else if (e.code === 'ArrowRight') flFly(1);
+  else if (e.code === 'ArrowLeft') flFly(-1);
+  else if (e.code === 'KeyS' && FL.queue.length) say(flFaces(FL.queue[0]).speak);
+});
+
 /* ================= Tiến độ ================= */
 const dayLabel = d => { const x = new Date(d * 86400000); return x.getUTCDate() + '/' + (x.getUTCMonth() + 1); };
+const missN = id => Math.max(S.mk[id] ? S.mk[id][2] : 0, S.cards[id] ? S.cards[id][4] : 0);
 const CATS = {
-  quen: {name:'Hay quên', test:c => c[4] >= 2 || c[2] <= 190, sort:(a, b) => S.cards[b][4] - S.cards[a][4] || S.cards[a][2] - S.cards[b][2]},
-  hoc: {name:'Đang học', test:c => c[1] < 21, sort:(a, b) => S.cards[a][0] - S.cards[b][0]},
-  thuoc: {name:'Đã thuộc', test:c => c[1] >= 21, sort:(a, b) => S.cards[b][1] - S.cards[a][1]},
+  chua: {name:'Chưa thuộc', test:id => S.mk[id] && S.mk[id][0] === 0, sort:(a, b) => missN(b) - missN(a)},
+  quen: {name:'Hay quên', test:id => missN(id) >= 2, sort:(a, b) => missN(b) - missN(a)},
+  thuoc: {name:'Đã thuộc', test:id => S.mk[id] && S.mk[id][0] === 1, sort:(a, b) => S.mk[b][1] - S.mk[a][1]},
 };
 function progGroups(dk){
   return dk === 'v' ? LV_V.map(l => [l, V.filter(x => x.lv === l).map(x => x.id)])
@@ -803,45 +1046,45 @@ function progGroups(dk){
     : P.map((s, i) => [s.title, PH.filter(x => x.si === i).map(x => x.id)]);
 }
 function progList(){
-  const dk = vstate.pDeck || 'v', cat = CATS[vstate.pList || 'quen'];
-  return progGroups(dk).flatMap(g => g[1]).filter(id => S.cards[id] && cat.test(S.cards[id])).sort(cat.sort);
+  const dk = vstate.pDeck || 'v', cat = CATS[vstate.pList] || CATS.chua;
+  return progGroups(dk).flatMap(g => g[1]).filter(cat.test).sort(cat.sort);
 }
-function cardTag(id){ const c = S.cards[id], t = dayNum(); if (!c) return 'mới'; if (c[4] >= 2) return 'quên ' + c[4] + ' lần'; return c[0] <= t ? 'ôn hôm nay' : 'ôn sau ' + ivlText(c[0] - t); }
+function cardTag(id){ const c = S.cards[id], t = dayNum(), n = missN(id); if (n >= 1 && S.mk[id] && !S.mk[id][0]) return 'chưa thuộc · sai ' + n + ' lần'; if (!c) return 'mới'; return c[0] <= t ? 'ôn hôm nay' : 'ôn sau ' + ivlText(c[0] - t); }
 views['tien-do'] = () => {
   const dk = vstate.pDeck || 'v', t = dayNum(), m = S.meta;
-  const all = Object.keys(S.cards), known = all.filter(id => S.cards[id][1] >= 21).length;
+  const seen = new Set(Object.keys(S.cards).concat(Object.keys(S.mk))), known = Object.values(S.mk).filter(m => m[0] === 1).length;
   const streak = m.streak.last >= t - 1 ? m.streak.count : 0;
   const h = m.hist || {}, days = [...Array(14)].map((_, i) => t - 13 + i), mx = Math.max(10, ...days.map(d => h[d] || 0));
   const fc = [0, 0, 0, 0, 0, 0, 0];
   for (const c of Object.values(S.cards)) { const k = c[0] - t; if (k <= 0) fc[0]++; else if (k < 7) fc[k]++; }
   const rows = progGroups(dk).map(([name, ids]) => {
-    let k = 0, l = 0; for (const id of ids) { const c = S.cards[id]; if (c) { if (c[1] >= 21) k++; else l++; } }
+    let k = 0, l = 0; for (const id of ids) { const m = S.mk[id]; if (m) { if (m[0]) k++; else l++; } else if (S.cards[id]) l++; }
     const n = ids.length || 1;
-    return `<div class="prow"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><b class="small" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(name)}</b><span class="small muted" style="flex:0 0 auto">${k} thuộc · ${l} đang học · ${ids.length - k - l} chưa</span></div><div class="sbar"><i class="k" style="width:${(k / n * 100).toFixed(2)}%"></i><i class="l" style="width:${(l / n * 100).toFixed(2)}%"></i></div></div>`;
+    return `<div class="prow"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><b class="small" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(name)}</b><span class="small muted" style="flex:0 0 auto">${k} thuộc · ${l} chưa thuộc · ${ids.length - k - l} chưa xem</span></div><div class="sbar"><i class="k" style="width:${(k / n * 100).toFixed(2)}%"></i><i class="l" style="width:${(l / n * 100).toFixed(2)}%"></i></div></div>`;
   }).join('');
   const lst = progList(), cnt = {};
-  for (const key of Object.keys(CATS)) cnt[key] = progGroups(dk).flatMap(g => g[1]).filter(id => S.cards[id] && CATS[key].test(S.cards[id])).length;
-  const cur = vstate.pList || 'quen';
-  return `<h2>Tiến độ học</h2><p class="sub">Thẻ <b>đã thuộc</b> = nhớ được ít nhất 3 tuần liền. <b>Hay quên</b> = quên từ 2 lần trở lên: nên ôn riêng nhóm này.</p>
-  <div class="stat"><div><b>${streak}</b><span>ngày liên tiếp</span></div><div><b>${all.length}</b><span>thẻ đã học</span></div><div><b>${known}</b><span>thẻ đã thuộc</span></div></div>
+  for (const key of Object.keys(CATS)) cnt[key] = progGroups(dk).flatMap(g => g[1]).filter(CATS[key].test).length;
+  const cur = CATS[vstate.pList] ? vstate.pList : 'chua';
+  return `<h2>Tiến độ học</h2><p class="sub">Đếm theo lần bạn vuốt / chấm gần nhất: <b>thuộc rồi</b> hay <b>chưa thuộc</b>. <b>Hay quên</b> = sai từ 2 lần trở lên.</p>
+  <div class="stat"><div><b>${streak}</b><span>ngày liên tiếp</span></div><div><b>${seen.size}</b><span>thẻ đã xem</span></div><div><b>${known}</b><span>thẻ đã thuộc</span></div></div>
   <h3>14 ngày qua (thẻ ôn + câu bài tập)</h3>
   <div class="panel"><div class="chart">${days.map(d => `<div class="cbar ${d === t ? 'today' : ''}"><b>${h[d] || ''}</b><i style="height:${((h[d] || 0) / mx * 100).toFixed(0)}%"></i><span>${dayLabel(d).split('/')[0]}</span></div>`).join('')}</div></div>
   <h3>Lịch ôn 7 ngày tới</h3>
   <div class="fc">${fc.map((n, i) => `<div><b>${n}</b><span>${i === 0 ? 'hôm nay' : dayLabel(t + i)}</span></div>`).join('')}</div>
   <h3>Theo từng phần</h3>
   <div class="chips">${[['v', 'Từ vựng'], ['k', 'Kanji'], ['p', 'Kaiwa']].map(([k, n]) => `<button class="chip ${dk === k ? 'on' : ''}" data-pd="${k}">${n}</button>`).join('')}</div>
-  <div class="panel" style="margin-top:8px"><div class="legend"><span><i style="background:var(--good)"></i>đã thuộc</span><span><i style="background:var(--hard)"></i>đang học</span><span><i style="background:var(--surface2)"></i>chưa học</span></div>${rows}</div>
+  <div class="panel" style="margin-top:8px"><div class="legend"><span><i style="background:var(--good)"></i>đã thuộc</span><span><i style="background:var(--hard)"></i>chưa thuộc</span><span><i style="background:var(--surface2)"></i>chưa xem</span></div>${rows}</div>
   <h3>Danh sách thẻ</h3>
   <div class="chips">${Object.entries(CATS).map(([k, c]) => `<button class="chip ${cur === k ? 'on' : ''}" data-pl="${k}">${c.name} · ${cnt[k]}</button>`).join('')}</div>
-  ${lst.length ? `<div class="row" style="margin:10px 0"><button class="btn pri" id="pCram">Ôn lại ${Math.min(lst.length, 50)} thẻ này</button><button class="btn" id="pEx">Bài tập nhóm này</button></div>
+  ${lst.length ? `<div class="row" style="margin:10px 0"><button class="btn pri" id="pCram">▶ Lật thẻ nhóm này (${lst.length})</button><button class="btn" id="pEx">Bài tập nhóm này</button></div>
   <div class="list">${lst.slice(0, 100).map(id => { const x = BY.get(id); return `<div class="item" data-open="${id}"><span class="dot ${stateDot(id)}"></span><div style="min-width:0"><div class="w">${esc(qText(x))}</div>${deckOf(id) === 'v' && x.r !== x.w ? `<div class="r">${esc(x.r)}</div>` : ''}</div><div class="m">${esc(aText(x))}<div class="small muted">${esc(cardTag(id))}</div></div></div>`; }).join('')}</div>${lst.length > 100 ? `<p class="small muted">Đang hiện 100 / ${lst.length} thẻ.</p>` : ''}`
   : `<div class="empty">Chưa có thẻ nào trong nhóm này. Học vài bài rồi quay lại xem.</div>`}`;
 };
 views['tien-do'].after = () => {
   document.querySelectorAll('[data-pd]').forEach(b => b.onclick = () => { vstate.pDeck = b.dataset.pd; saveUi(); route(); });
   document.querySelectorAll('[data-pl]').forEach(b => b.onclick = () => { vstate.pList = b.dataset.pl; saveUi(); route(); });
-  const name = DECK_NAME[vstate.pDeck || 'v'] + ' · ' + CATS[vstate.pList || 'quen'].name.toLowerCase();
-  if ($('#pCram')) $('#pCram').onclick = () => startSession(progList().slice(0, 50), name, true, true);
+  const name = DECK_NAME[vstate.pDeck || 'v'] + ' · ' + (CATS[vstate.pList] || CATS.chua).name.toLowerCase();
+  if ($('#pCram')) $('#pCram').onclick = () => openFlash(progList(), name);
   if ($('#pEx')) $('#pEx').onclick = () => exChooser(progList(), name);
   bindOpen();
 };
@@ -898,7 +1141,7 @@ function startGo(ids, title){
       if (done) { Q.i++; show(); return; }
       if (!inp.value.trim()) { inp.focus(); return; }
       done = true; const ok = checkReading(inp.value, x.r); bump();
-      if (ok) Q.score++; else { Q.wrong.push(x); const c = S.cards[x.id]; if (c) { c[0] = dayNum(); c[4]++; } }
+      if (ok) Q.score++; else { Q.wrong.push(x); markOnly(x.id, false); const c = S.cards[x.id]; if (c) { c[0] = dayNum(); c[4]++; } }
       save([x.id]); say(x.r); inp.disabled = true;
       $('#goRes').innerHTML = `<div class="ans"><div style="font-weight:700;color:var(${ok ? '--good' : '--again'})">${ok ? 'Đúng rồi' : 'Chưa đúng'}</div><div class="reading">${esc(x.r)}</div><div class="romaji">${esc(romaji(x.r))}</div><div class="meaning" style="font-size:19px">${esc(x.vi)}</div></div>`;
       $('#goChk').textContent = 'Câu tiếp';
@@ -936,7 +1179,7 @@ function startGhep(ids, title){
       if (!selL || !selR) return;
       const L = document.querySelector(`[data-l="${selL}"]`), R = document.querySelector(`[data-r="${selR}"]`);
       if (selL === selR) { L.className = 'mbtn jp ok'; R.className = 'mbtn ok'; L.disabled = R.disabled = true; matched++; bump(); say(speakOf(BY.get(selL))); if (matched === items.length) setTimeout(() => { Q.r++; show(); }, 600); }
-      else { Q.miss++; Q.missed.add(selL); L.classList.add('no'); R.classList.add('no'); setTimeout(() => { L.className = 'mbtn jp'; R.className = 'mbtn'; }, 450); }
+      else { Q.miss++; Q.missed.add(selL); markOnly(selL, false); L.classList.add('no'); R.classList.add('no'); setTimeout(() => { L.className = 'mbtn jp'; R.className = 'mbtn'; }, 450); }
       selL = selR = null;
     };
     document.querySelectorAll('[data-l]').forEach(b => b.onclick = () => { document.querySelectorAll('[data-l].sel').forEach(x => x.classList.remove('sel')); selL = b.dataset.l; b.classList.add('sel'); tryPair(); });

@@ -1,4 +1,4 @@
-const C = 'nhat-ngu-b3b7dd3c98';
+const C = 'nhat-ngu-ae82944eb7';
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(C).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener('activate', e => {
