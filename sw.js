@@ -1,5 +1,5 @@
-const C = 'nhat-ngu-ae82944eb7';
-const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
+const C = 'nhat-ngu-3fb6bedf28';
+const FILES = ['./', 'index.html', 'net.json', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(C).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('nhat-ngu-') && k !== C && k !== C + '-font').map(k => caches.delete(k)))).then(() => self.clients.claim()));
