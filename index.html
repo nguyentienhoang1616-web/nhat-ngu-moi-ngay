@@ -135,6 +135,17 @@ h3{font-size:16px;margin:18px 0 8px}
 .winfo{text-align:center;margin:4px 0 10px}
 .winfo .ch{font-family:var(--f-card);font-size:40px;font-weight:600;line-height:1.1}
 .wmsg{text-align:center;min-height:22px;font-size:14px;font-weight:600;margin-top:8px}
+.mic{display:grid;place-items:center;margin:14px auto 6px;width:96px;height:96px;border-radius:50%;border:none;background:var(--shu);color:#fff;font-size:38px;cursor:pointer;box-shadow:0 6px 18px rgba(184,64,46,.35)}
+.mic.on{animation:micp 1.1s ease-in-out infinite}
+@keyframes micp{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@media (prefers-reduced-motion: reduce){.mic.on{animation:none;outline:4px solid var(--shu);outline-offset:4px}}
+.spjp{font-family:var(--f-jp);font-size:24px;font-weight:600;line-height:1.4;text-align:center}
+.spsub{text-align:center;font-size:14px;color:var(--muted)}
+.spres{margin-top:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}
+.spscore{font-size:40px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+.spdiff{font-family:var(--f-jp);font-size:20px;letter-spacing:1px;margin-top:8px;word-break:break-all}
+.spdiff .y{color:var(--good)}.spdiff .n{color:var(--again);text-decoration:underline}
+.mic-mini{border:none;background:color-mix(in srgb,var(--shu) 16%,var(--surface));color:var(--shu);border-radius:50%;width:34px;height:34px;flex:0 0 auto;cursor:pointer;font-size:15px;display:grid;place-items:center;margin-left:6px}
 .phrase{padding:12px;border-top:1px solid var(--line)}
 .phrase:first-child{border-top:none}
 .phrase .jp{font-size:18px;font-weight:500}
@@ -401,7 +412,7 @@ async function flush(){
   const todo = [...dirty]; dirty.clear();
   for (const name of todo) {
     try {
-      if (name === 'meta') await REM.doc('meta').set({settings:S.meta.settings, daily:S.meta.daily, streak:S.meta.streak, hist:S.meta.hist || {}, wr:S.wr || {}, updated:S.meta.updated});
+      if (name === 'meta') await REM.doc('meta').set({settings:S.meta.settings, daily:S.meta.daily, streak:S.meta.streak, hist:S.meta.hist || {}, wr:S.wr || {}, sp:S.sp || {}, updated:S.meta.updated});
       else { const part = {}, pm = {}; for (const [id, c] of Object.entries(S.cards)) if (shardOf(id) === name) part[id] = c; for (const [id, c] of Object.entries(S.mk)) if (shardOf(id) === name) pm[id] = c; await REM.doc(name).set({cards:part, mk:pm}); }
     } catch (e) { dirty.add(name); }
   }
@@ -420,7 +431,7 @@ async function initSync(){
     for (const d of snap.docs) {
       const body = d.data(); if (!body) continue;
       if (d.id === 'meta') {
-        if ((body.updated || 0) > (S.meta.updated || 0)) { S.meta.settings = {...DEFAULTS, ...body.settings}; S.meta.streak = body.streak || S.meta.streak; if (body.hist) S.meta.hist = body.hist; if (body.wr) S.wr = Object.assign({}, body.wr, S.wr || {}); if (body.daily && body.daily.day === dayNum()) S.meta.daily = body.daily; changed = true; }
+        if ((body.updated || 0) > (S.meta.updated || 0)) { S.meta.settings = {...DEFAULTS, ...body.settings}; S.meta.streak = body.streak || S.meta.streak; if (body.hist) S.meta.hist = body.hist; if (body.wr) S.wr = Object.assign({}, body.wr, S.wr || {}); if (body.sp) { S.sp = S.sp || {}; for (const [k2, v2] of Object.entries(body.sp)) S.sp[k2] = Math.max(v2, S.sp[k2] || 0); } if (body.daily && body.daily.day === dayNum()) S.meta.daily = body.daily; changed = true; }
       } else {
         for (const [id, c] of Object.entries(body.cards || {})) { const mine = S.cards[id]; if (!mine || (c[5] || 0) > (mine[5] || 0)) { S.cards[id] = c; changed = true; } }
         for (const [id, c] of Object.entries(body.mk || {})) { const mine = S.mk[id]; if (!mine || (c[1] || 0) > (mine[1] || 0)) { S.mk[id] = c; changed = true; } }
@@ -631,11 +642,11 @@ P.forEach((s, i) => {
   views[name] = () => {
     const mode = vstate['km' + i] || '';
     return `<p class="small" style="margin:6px 0 0"><a href="#kaiwa" style="color:var(--ai)">‹ Kaiwa</a></p><h2>${esc(s.title)}</h2>
-    <div class="row" style="margin:8px 0 10px"><button class="btn pri" id="kLearn">▶ Lật thẻ câu</button><button class="btn" id="kQuiz">Bài tập · ôn lại</button></div>
+    <div class="row" style="margin:8px 0 10px"><button class="btn pri" id="kLearn">▶ Lật thẻ câu</button><button class="btn" id="kQuiz">Bài tập · ôn lại</button><button class="btn" id="kNoi">🎤 Luyện nói</button></div>
     <div class="chips"><button class="chip ${mode === '' ? 'on' : ''}" data-km="">Hiện hết</button><button class="chip ${mode === 'hide-vi' ? 'on' : ''}" data-km="hide-vi">Che tiếng Việt</button><button class="chip ${mode === 'hide-jp' ? 'on' : ''}" data-km="hide-jp">Che tiếng Nhật (tự nói)</button></div>
     <p class="hint">Chế độ che: tự đoán / tự nói trước, rồi bấm vào chỗ mờ để xem.</p>
     <h3>Câu hay dùng</h3>
-    <div class="list ${mode}">${s.phrases.map((p, j) => `<div class="phrase"><div class="row" style="flex-wrap:nowrap;align-items:flex-start"><div style="flex:1;min-width:0"><div class="jp">${esc(p[0])}</div>${p[1] !== p[0] ? `<div class="kana">${esc(p[1])}</div>` : ''}${ST().romaji && p[6] ? `<div class="ro">${esc(p[6])}</div>` : ''}<div class="vi">${esc(p[2])}</div><div class="meta"><span class="tag ${p[3] === 'mình nói' ? 'me' : ''}">${esc(p[3])}</span><span class="tag">${esc(p[4])}</span>${p[5] ? esc(p[5]) : ''}</div></div>${sayBtn(p[0])}</div></div>`).join('')}</div>
+    <div class="list ${mode}">${s.phrases.map((p, j) => `<div class="phrase"><div class="row" style="flex-wrap:nowrap;align-items:flex-start"><div style="flex:1;min-width:0"><div class="jp">${esc(p[0])}</div>${p[1] !== p[0] ? `<div class="kana">${esc(p[1])}</div>` : ''}${ST().romaji && p[6] ? `<div class="ro">${esc(p[6])}</div>` : ''}<div class="vi">${esc(p[2])}</div><div class="meta"><span class="tag ${p[3] === 'mình nói' ? 'me' : ''}">${esc(p[3])}</span><span class="tag">${esc(p[4])}</span>${p[5] ? esc(p[5]) : ''}</div></div>${sayBtn(p[0])}<button class="mic-mini" data-spk="${j}" aria-label="Nói thử câu này">🎤</button></div></div>`).join('')}</div>
     <h3>Hội thoại mẫu</h3>
     ${s.dialogs.map((d, di) => `<div class="panel" style="margin-bottom:10px"><div class="row" style="justify-content:space-between;margin-bottom:8px"><b>${esc(d.title)}</b><button class="btn ghost" data-dlg="${di}">🔊 Nghe cả đoạn</button></div><div class="dlg ${mode}">${d.lines.map(l => `<div class="bubble ${l[0] === 'B' ? 'b' : ''}"><div class="who">${esc(l[1])}</div><div class="jp">${esc(l[2])}</div>${l[3] !== l[2] ? `<div class="kana small muted jp">${esc(l[3])}</div>` : ''}${ST().romaji && l[5] ? `<div class="small muted"><i>${esc(l[5])}</i></div>` : ''}<div class="vi small">${esc(l[4])}</div><button class="say" style="margin-top:4px;width:28px;height:28px;font-size:12px" data-say="${esc(l[2])}" aria-label="Nghe">🔊</button></div>`).join('')}</div></div>`).join('')}`;
   };
@@ -643,6 +654,8 @@ P.forEach((s, i) => {
     const ids = PH.filter(x => x.si === i).map(x => x.id);
     $('#kLearn').onclick = () => openFlash(ids, s.title);
     $('#kQuiz').onclick = () => exChooser(ids, s.title);
+    $('#kNoi').onclick = () => openSpeak(ids.map(spItem), 0, s.title);
+    document.querySelectorAll('[data-spk]').forEach(b => b.onclick = e => { e.stopPropagation(); openSpeak(ids.map(spItem), +b.dataset.spk, s.title); });
     document.querySelectorAll('[data-km]').forEach(b => b.onclick = () => { vstate['km' + i] = b.dataset.km; saveUi(); route(); });
     document.querySelectorAll('[data-dlg]').forEach(b => b.onclick = () => sayLines(s.dialogs[+b.dataset.dlg].lines.map(l => l[2])));
     document.querySelectorAll('.hide-vi .vi, .hide-jp .jp, .hide-jp .kana, .hide-jp .ro').forEach(el => el.addEventListener('click', () => { el.style.filter = 'none'; }));
@@ -739,7 +752,7 @@ function startSession(ids, title, ignoreLimit, cram){
   SES = {title, queue:ids.slice(), total:ids.length, done:0, seen:new Set(), flipped:false, ignoreLimit:!!ignoreLimit, cram:!!cram, front:null, again:0};
   $('#study').hidden = false; document.body.style.overflow = 'hidden'; showCard();
 }
-function endSession(){ $('#study').hidden = true; document.body.style.overflow = ''; if (window.speechSynthesis) speechSynthesis.cancel(); SES = null; route(); }
+function endSession(){ if (typeof stopRecog === 'function') stopRecog(); $('#study').hidden = true; document.body.style.overflow = ''; if (window.speechSynthesis) speechSynthesis.cancel(); SES = null; route(); }
 $('#sClose').onclick = endSession;
 function frontSide(id){ const s = ST().dir; const d = deckOf(id); if (d === 'k') return 'jp'; return s === 'mix' ? (Math.random() < 0.5 ? 'jp' : 'vi') : s; }
 function showCard(){
@@ -1083,6 +1096,7 @@ views['hoc'] = () => {
   <h3>Giao tiếp · Kỹ năng</h3>
   <div class="mods">
     ${mod('#kaiwa', '話', 'Kaiwa thực tế', P.length + ' tình huống · ' + PH.length + ' câu')}
+    ${mod('#luyen-noi', '声', 'Luyện nói', 'Đọc to · máy chấm điểm', Object.keys(S.sp || {}).length ? Object.keys(S.sp).length + ' câu' : '')}
     ${soon('文', 'Ngữ pháp', 'N5 → N1')}
     ${soon('読', 'Đọc hiểu', 'Bài đọc + câu hỏi')}
     ${soon('聴', 'Nghe hiểu', 'Nghe hội thoại')}
@@ -1123,6 +1137,122 @@ views['chu-de'].after = () => {
     $('#nx').onclick = () => { vstate.tpPage++; saveUi(); route(); };
     bindOpen();
   }
+};
+
+/* ================= Luyện nói (nhận giọng nói của trình duyệt, miễn phí) ================= */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+function spItem(id){
+  if (id.startsWith('ex:')) { const x = BY.get(id.slice(3)); return {id, jp:x.vd, kana:x.vdk || x.vd, vi:x.vdv, ro:romaji(x.vdk || x.vd)}; }
+  const x = BY.get(id), d = deckOf(id);
+  if (d === 'v') return {id, jp:x.w, kana:x.r, vi:x.vi, ro:romaji(x.r)};
+  return {id, jp:x.jp, kana:x.kana, vi:x.vi, ro:x.ro || romaji(x.kana)};
+}
+const spNorm = t => k2h(String(t || '').normalize('NFKC')).replace(/[\s、。，．,.!?！？「」『』（）()…・〜~\-ー]/g, '');
+let SPDICT = null, SPMAX = 1;
+function toKanaGuess(t){ // đổi chữ Hán sang cách đọc bằng kho từ vựng (khớp đoạn dài nhất)
+  if (!SPDICT) { SPDICT = new Map(); for (const v of V) if (hasKanji(v.w) && !v.w.includes('～')) { for (const w of v.w.split(/[;；、]/)) { const w2 = w.trim(); if (w2 && !SPDICT.has(w2)) { SPDICT.set(w2, v.r.split(/[;；、]/)[0].trim()); SPMAX = Math.max(SPMAX, [...w2].length); } } } }
+  const a = [...String(t || '')]; let out = '', i = 0;
+  while (i < a.length) { let hit = false; for (let L = Math.min(SPMAX, a.length - i); L >= 1; L--) { const sub = a.slice(i, i + L).join(''); if (L > 1 || hasKanji(sub)) { const r = SPDICT.get(sub); if (r) { out += r; i += L; hit = true; break; } } } if (!hit) { out += a[i]; i++; } }
+  return out;
+}
+function lev(a, b){ const m = a.length, n = b.length; if (!m) return n; if (!n) return m; let prev = Array.from({length:n + 1}, (_, j) => j); for (let i = 1; i <= m; i++) { const cur = [i]; for (let j = 1; j <= n; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); prev = cur; } return prev[n]; }
+const simil = (a, b) => (!a && !b) ? 1 : 1 - lev(a, b) / Math.max(a.length, b.length);
+function spScore(item, heard){
+  const tJ = spNorm(item.jp), tK = spNorm(item.kana), tG = spNorm(toKanaGuess(item.jp));
+  let best = {score:0, said:'', target:tK};
+  for (const h of heard) {
+    const hR = spNorm(h), hK = spNorm(toKanaGuess(h));
+    const cands = [[simil(tJ, hR), tJ, hR], [simil(tK, hK), tK, hK], [simil(tG, hK), tG, hK], [simil(tK, hR), tK, hR]];
+    for (const [sc, tg, sd] of cands) if (sc > best.score) best = {score:sc, said:sd, target:tg, raw:h};
+  }
+  best.score = Math.max(0, Math.round(best.score * 100));
+  return best;
+}
+function spDiff(target, said){ // tô xanh chữ khớp, đỏ chữ thiếu / sai (theo dãy chung dài nhất)
+  const a = [...target], b = [...said], m = a.length, n = b.length, L = Array.from({length:m + 1}, () => new Array(n + 1).fill(0));
+  for (let i = m - 1; i >= 0; i--) for (let j = n - 1; j >= 0; j--) L[i][j] = a[i] === b[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+  let i = 0, j = 0, out = '';
+  while (i < m) { if (j < n && a[i] === b[j]) { out += '<span class="y">' + esc(a[i]) + '</span>'; i++; j++; } else if (j < n && L[i][j + 1] >= L[i + 1][j]) j++; else { out += '<span class="n">' + esc(a[i]) + '</span>'; i++; } }
+  return out;
+}
+let SPK = null, recog = null;
+function openSpeak(items, i, title){
+  SPK = {items:items.filter(x => x && x.jp), i:Math.max(0, i), title};
+  if (!SPK.items.length) return;
+  SES = {quiz:true, speak:true};
+  $('#study').hidden = false; document.body.style.overflow = 'hidden';
+  showSpeak();
+}
+function stopRecog(){ try { if (recog) recog.abort(); } catch (e) {} recog = null; }
+function showSpeak(){
+  stopRecog();
+  const P2 = SPK, it = P2.items[P2.i], best = (S.sp || {})[it.id];
+  $('#sBar').style.width = (P2.i / P2.items.length * 100) + '%'; $('#sCount').textContent = (P2.i + 1) + ' / ' + P2.items.length;
+  $('#sBody').innerHTML = `<div class="small muted" style="text-align:center">${esc(P2.title || 'Luyện nói')}</div>
+    <div class="spjp" style="margin-top:6px">${esc(it.jp)}</div>${it.kana !== it.jp ? `<div class="spsub jp">${esc(it.kana)}</div>` : ''}${ST().romaji && it.ro ? `<div class="spsub"><i>${esc(it.ro)}</i></div>` : ''}<div class="spsub" style="color:var(--ink);margin-top:4px">${esc(it.vi)}</div>
+    <div class="row" style="justify-content:center;margin-top:10px"><button class="btn ghost" id="spPlay">🔊 Nghe mẫu</button>${best != null ? `<span class="small muted">Điểm cao nhất: <b>${best}</b></span>` : ''}</div>
+    ${SR ? `<button class="mic" id="spMic" aria-label="Bấm để nói">🎤</button><div class="spsub" id="spLive">Bấm 🎤 rồi đọc to câu trên</div>` : `<div class="spres"><b>Máy / trình duyệt này chưa nhận giọng nói được.</b><div class="small muted" style="margin-top:6px">Mở bằng app cài điện thoại (Chrome trên Android, Safari trên iPhone) hoặc Chrome trên máy tính.</div></div>`}
+    <div id="spRes"></div>`;
+  $('#sFoot').innerHTML = `<div class="row" style="justify-content:space-between;flex-wrap:nowrap"><button class="btn ghost" id="spPrev" ${P2.i ? '' : 'disabled'}>‹ Câu trước</button><button class="btn pri" id="spNext">${P2.i < P2.items.length - 1 ? 'Câu sau ›' : 'Xong'}</button></div>`;
+  $('#spPlay').onclick = () => say(it.jp);
+  $('#spPrev').onclick = () => { if (P2.i > 0) { P2.i--; showSpeak(); } };
+  $('#spNext').onclick = () => { if (P2.i < P2.items.length - 1) { P2.i++; showSpeak(); } else { stopRecog(); endSession(); } };
+  if (SR) $('#spMic').onclick = () => toggleRecog(it);
+}
+function toggleRecog(it){
+  if (recog) { try { recog.stop(); } catch (e) {} return; }
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  const r = new SR(); recog = r;
+  r.lang = 'ja-JP'; r.interimResults = true; r.maxAlternatives = 5; r.continuous = false;
+  const mic = $('#spMic'), live = $('#spLive'); let finals = null;
+  mic.classList.add('on'); live.textContent = 'Đang nghe… đọc to, rõ';
+  r.onresult = e => {
+    const res = e.results[e.results.length - 1];
+    live.textContent = 'Máy nghe: ' + res[0].transcript;
+    if (res.isFinal) { finals = []; for (let k = 0; k < res.length; k++) finals.push(res[k].transcript); }
+  };
+  r.onerror = e => {
+    const msg = e.error === 'not-allowed' || e.error === 'service-not-allowed' ? 'Chưa được dùng micro. Cho phép micro cho trang này rồi thử lại (trong link Claude micro bị chặn, hãy dùng app cài điện thoại).'
+      : e.error === 'no-speech' ? 'Không nghe thấy gì. Bấm 🎤 rồi nói to hơn.' : e.error === 'network' ? 'Nhận giọng nói cần có mạng.' : e.error === 'aborted' ? '' : 'Lỗi nhận giọng: ' + e.error;
+    if (msg) live.textContent = msg;
+  };
+  r.onend = () => {
+    mic.classList.remove('on'); recog = null;
+    if (!finals || !finals.length) { if (live.textContent.startsWith('Đang nghe')) live.textContent = 'Không nghe thấy gì. Bấm 🎤 rồi nói lại.'; return; }
+    const b = spScore(it, finals);
+    S.sp = S.sp || {}; S.sp[it.id] = Math.max(b.score, S.sp[it.id] || 0); bump(); save();
+    const verdict = b.score >= 90 ? ['var(--good)', 'Rất tốt! Người Nhật nghe hiểu ngay.'] : b.score >= 70 ? ['var(--hard)', 'Khá. Nghe lại mẫu, nói lại chỗ gạch đỏ.'] : ['var(--again)', 'Chưa rõ. Bấm 🔊 nghe mẫu, nói chậm và rõ từng âm.'];
+    $('#spRes').innerHTML = `<div class="spres"><div class="spscore" style="color:${verdict[0]}">${b.score}<span style="font-size:18px">/100</span></div><div style="font-weight:600;margin-top:4px">${verdict[1]}</div>
+      <div class="spdiff">${spDiff(b.target, b.said)}</div><div class="small muted" style="margin-top:6px">Máy nghe được: ${esc(b.raw || finals[0])}</div></div>`;
+    live.textContent = 'Bấm 🎤 để nói lại';
+  };
+  try { r.start(); } catch (e) { mic.classList.remove('on'); recog = null; live.textContent = 'Không bật được micro: ' + e.message; }
+}
+const SP_SRC = [['p', 'Kaiwa'], ['v', 'Từ vựng'], ['ex', 'Câu ví dụ']];
+function spPool(){
+  const src = vstate.spSrc || 'p', g = vstate.spGrp || (src === 'p' ? '0' : 'N5');
+  if (src === 'p') return PH.filter(x => String(x.si) === g).map(x => x.id);
+  if (src === 'v') return V.filter(x => x.lv === g).map(x => x.id);
+  return V.filter(x => x.lv === g && x.vd).map(x => 'ex:' + x.id);
+}
+views['luyen-noi'] = () => {
+  const src = vstate.spSrc || 'p', g = vstate.spGrp || (src === 'p' ? '0' : 'N5'), pool = spPool(), sp = S.sp || {};
+  const done = pool.filter(id => sp[id] != null).length, good = pool.filter(id => (sp[id] || 0) >= 80).length;
+  const groups = src === 'p' ? P.map((s2, i) => [String(i), s2.title]) : LV_V.map(l => [l, l]);
+  return `<h2>Luyện nói</h2><p class="sub">Đọc to câu tiếng Nhật, máy nhận giọng nói của điện thoại nghe và chấm điểm, tô đỏ chỗ chưa rõ. Máy hiểu đúng thì người Nhật cũng hiểu.</p>
+  ${SR ? '' : `<div class="panel" style="margin-bottom:10px"><b>Trình duyệt này chưa nhận giọng nói.</b> <span class="small muted">Dùng app cài điện thoại (Chrome Android / Safari iPhone) hoặc Chrome máy tính.</span></div>`}
+  <div class="chips">${SP_SRC.map(([k, n]) => `<button class="chip ${src === k ? 'on' : ''}" data-sps="${k}">${n}</button>`).join('')}</div>
+  <div class="chips">${groups.map(([k, n]) => `<button class="chip ${g === k ? 'on' : ''}" data-spg="${esc(k)}">${esc(n)}</button>`).join('')}</div>
+  <div class="panel" style="margin-top:8px">${pool.length} câu · đã nói ${done} · đạt từ 80 điểm ${good}<div class="bar"><i style="width:${(pool.length ? good / pool.length * 100 : 0).toFixed(1)}%"></i></div></div>
+  <div class="row" style="margin:10px 0"><button class="btn pri" id="spAll">🎤 Luyện lần lượt</button><button class="btn" id="spTodo">Chỉ câu chưa đạt 80</button></div>
+  <p class="small muted">Mẹo: nói to, rõ, cách điện thoại khoảng một gang tay, chỗ yên tĩnh. Cần có mạng để nhận giọng.</p>`;
+};
+views['luyen-noi'].after = () => {
+  document.querySelectorAll('[data-sps]').forEach(b => b.onclick = () => { vstate.spSrc = b.dataset.sps; vstate.spGrp = null; saveUi(); route(); });
+  document.querySelectorAll('[data-spg]').forEach(b => b.onclick = () => { vstate.spGrp = b.dataset.spg; saveUi(); route(); });
+  const title = () => { const src = vstate.spSrc || 'p', g = vstate.spGrp || (src === 'p' ? '0' : 'N5'); return src === 'p' ? P[+g].title : (src === 'v' ? 'Từ vựng ' : 'Câu ví dụ ') + g; };
+  $('#spAll').onclick = () => openSpeak(spPool().map(spItem), 0, title());
+  $('#spTodo').onclick = () => { const todo = spPool().filter(id => ((S.sp || {})[id] || 0) < 80); if (!todo.length) toast('Đã đạt hết phần này'); else openSpeak(todo.map(spItem), 0, title()); };
 };
 
 /* ================= Luyện viết (dữ liệu nét chữ KanjiVG, CC BY-SA) ================= */
