@@ -412,7 +412,7 @@ async function flush(){
   const todo = [...dirty]; dirty.clear();
   for (const name of todo) {
     try {
-      if (name === 'meta') await REM.doc('meta').set({settings:S.meta.settings, daily:S.meta.daily, streak:S.meta.streak, hist:S.meta.hist || {}, wr:S.wr || {}, sp:S.sp || {}, updated:S.meta.updated});
+      if (name === 'meta') await REM.doc('meta').set({settings:S.meta.settings, daily:S.meta.daily, streak:S.meta.streak, hist:S.meta.hist || {}, wr:S.wr || {}, sp:S.sp || {}, ng:S.ng || {}, updated:S.meta.updated});
       else { const part = {}, pm = {}; for (const [id, c] of Object.entries(S.cards)) if (shardOf(id) === name) part[id] = c; for (const [id, c] of Object.entries(S.mk)) if (shardOf(id) === name) pm[id] = c; await REM.doc(name).set({cards:part, mk:pm}); }
     } catch (e) { dirty.add(name); }
   }
@@ -431,7 +431,7 @@ async function initSync(){
     for (const d of snap.docs) {
       const body = d.data(); if (!body) continue;
       if (d.id === 'meta') {
-        if ((body.updated || 0) > (S.meta.updated || 0)) { S.meta.settings = {...DEFAULTS, ...body.settings}; S.meta.streak = body.streak || S.meta.streak; if (body.hist) S.meta.hist = body.hist; if (body.wr) S.wr = Object.assign({}, body.wr, S.wr || {}); if (body.sp) { S.sp = S.sp || {}; for (const [k2, v2] of Object.entries(body.sp)) S.sp[k2] = Math.max(v2, S.sp[k2] || 0); } if (body.daily && body.daily.day === dayNum()) S.meta.daily = body.daily; changed = true; }
+        if ((body.updated || 0) > (S.meta.updated || 0)) { S.meta.settings = {...DEFAULTS, ...body.settings}; S.meta.streak = body.streak || S.meta.streak; if (body.hist) S.meta.hist = body.hist; if (body.wr) S.wr = Object.assign({}, body.wr, S.wr || {}); if (body.sp) { S.sp = S.sp || {}; for (const [k2, v2] of Object.entries(body.sp)) S.sp[k2] = Math.max(v2, S.sp[k2] || 0); } if (body.ng) { S.ng = S.ng || {}; for (const [k2, v2] of Object.entries(body.ng)) S.ng[k2] = Math.max(v2, S.ng[k2] || 0); } if (body.daily && body.daily.day === dayNum()) S.meta.daily = body.daily; changed = true; }
       } else {
         for (const [id, c] of Object.entries(body.cards || {})) { const mine = S.cards[id]; if (!mine || (c[5] || 0) > (mine[5] || 0)) { S.cards[id] = c; changed = true; } }
         for (const [id, c] of Object.entries(body.mk || {})) { const mine = S.mk[id]; if (!mine || (c[1] || 0) > (mine[1] || 0)) { S.mk[id] = c; changed = true; } }
@@ -1099,7 +1099,7 @@ views['hoc'] = () => {
     ${mod('#luyen-noi', '声', 'Luyện nói', 'Đọc to · máy chấm điểm', Object.keys(S.sp || {}).length ? Object.keys(S.sp).length + ' câu' : '')}
     ${soon('文', 'Ngữ pháp', 'N5 → N1')}
     ${soon('読', 'Đọc hiểu', 'Bài đọc + câu hỏi')}
-    ${soon('聴', 'Nghe hiểu', 'Nghe hội thoại')}
+    ${mod('#nghe-hieu', '聴', 'Nghe hiểu', NG_D.length + ' đoạn hội thoại', Object.keys(S.ng || {}).length ? Object.keys(S.ng).length + ' đoạn' : '')}
     ${soon('試', 'Thi thử JLPT', 'Đề theo cấp')}
   </div>
   <h3>Ôn tập</h3>
@@ -1254,6 +1254,71 @@ views['luyen-noi'].after = () => {
   $('#spAll').onclick = () => openSpeak(spPool().map(spItem), 0, title());
   $('#spTodo').onclick = () => { const todo = spPool().filter(id => ((S.sp || {})[id] || 0) < 80); if (!todo.length) toast('Đã đạt hết phần này'); else openSpeak(todo.map(spItem), 0, title()); };
 };
+
+/* ================= Nghe hiểu (từ hội thoại mẫu có sẵn) ================= */
+const NG_D = []; P.forEach((s2, si) => s2.dialogs.forEach((d, di) => NG_D.push({key:si + '_' + di, si, di, s:s2, d})));
+function sayAt(text, r){ const st = ST(), o = st.rate; st.rate = r; say(text); st.rate = o; }
+const ngGrp = () => vstate.ngGrp == null ? 'all' : vstate.ngGrp;
+views['nghe-hieu'] = () => {
+  const g = ngGrp(), ng = S.ng || {};
+  const list = NG_D.filter(x => g === 'all' || String(x.si) === g);
+  const done = NG_D.filter(x => ng[x.key] != null).length, good = NG_D.filter(x => (ng[x.key] || 0) >= 80).length;
+  return `<h2>Nghe hiểu</h2><p class="sub">Bước 1 nghe cả đoạn hội thoại, không nhìn chữ. Bước 2 nghe từng câu, chọn nghĩa đúng. Trả lời xong mới hiện chữ.</p>
+  <div class="panel">${NG_D.length} đoạn · đã nghe ${done} · đạt từ 80% ${good}<div class="bar"><i style="width:${(good / NG_D.length * 100).toFixed(1)}%"></i></div></div>
+  <div class="row" style="margin:10px 0"><button class="btn pri" id="ngNext">🎧 Nghe đoạn chưa đạt</button></div>
+  <div class="chips"><button class="chip ${g === 'all' ? 'on' : ''}" data-ngg="all">Tất cả</button>${P.map((s2, i) => `<button class="chip ${g === String(i) ? 'on' : ''}" data-ngg="${i}">${esc(s2.title)}</button>`).join('')}</div>
+  <div style="display:grid;gap:8px;margin-top:8px">${list.map(x => { const b = ng[x.key]; return `<button class="opt" data-ngd="${x.key}" style="display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%"><span><b>${esc(x.d.title)}</b><br><span class="small muted">${esc(x.s.title)} · ${x.d.lines.length} câu</span></span><span class="small" style="white-space:nowrap;color:${b >= 80 ? 'var(--good)' : 'var(--muted)'}">${b == null ? 'chưa nghe' : b + '%'}</span></button>`; }).join('')}</div>`;
+};
+views['nghe-hieu'].after = () => {
+  document.querySelectorAll('[data-ngg]').forEach(b => b.onclick = () => { vstate.ngGrp = b.dataset.ngg; saveUi(); route(); });
+  document.querySelectorAll('[data-ngd]').forEach(b => b.onclick = () => startNghe(b.dataset.ngd));
+  $('#ngNext').onclick = () => { const ng = S.ng || {}, g = ngGrp(); const x = NG_D.find(y => (g === 'all' || String(y.si) === g) && (ng[y.key] || 0) < 80); if (!x) toast('Đã đạt hết phần này'); else startNghe(x.key); };
+};
+function ngOpts(x, li){
+  const L = x.d.lines, right = L[li][4];
+  const same = shuffle(L.filter((l, j) => j !== li).map(l => l[4]).filter(v => v && v !== right));
+  const rest = shuffle(x.s.phrases.map(p => p[2]).filter(v => v && v !== right && !same.includes(v)));
+  return shuffle([right, ...[...new Set(same.concat(rest))].slice(0, 3)]);
+}
+function startNghe(key){
+  const x = NG_D.find(y => y.key === key); if (!x) return;
+  SES = {quiz:true, nghe:true, x, i:-1, score:0, ans:[], opts:null};
+  $('#study').hidden = false; document.body.style.overflow = 'hidden'; showNghe();
+}
+function ngLine(l){ return `<span class="jp" style="font-size:22px;color:var(--ink)">${esc(l[2])}</span>${l[3] && l[3] !== l[2] ? `<br><span class="jp">${esc(l[3])}</span>` : ''}${ST().romaji && l[5] ? `<br><span class="small muted">${esc(l[5])}</span>` : ''}`; }
+function showNghe(){
+  const Q = SES, x = Q.x, L = x.d.lines, body = $('#sBody'), foot = $('#sFoot'), n = Math.max(0, Q.i);
+  $('#sBar').style.width = (Math.min(n, L.length) / L.length * 100) + '%'; $('#sCount').textContent = Math.min(n, L.length) + ' / ' + L.length;
+  const all = () => sayLines(L.map(l => l[2]));
+  if (Q.i < 0) {
+    body.innerHTML = `<div class="card" style="flex:0 0 auto;min-height:240px;cursor:default"><div class="hint">${esc(x.s.title)}</div><h2 style="margin:6px 0 14px">${esc(x.d.title)}</h2><div class="row" style="justify-content:center"><button class="btn pri" id="ngAll" style="font-size:20px;padding:16px 24px">🔊 Nghe cả đoạn</button><button class="btn" id="ngAllSlow">🐢 Chậm</button></div><div class="hint" style="margin-top:12px">Bước 1: nghe 1–2 lần, đừng nhìn chữ. Đoán xem ai nói gì, chuyện gì đang xảy ra.</div></div>`;
+    foot.innerHTML = '<button class="btn pri wide" id="ngGo">Bước 2: nghe từng câu ›</button>';
+    $('#ngAll').onclick = all; $('#ngAllSlow').onclick = () => { const st = ST(), o = st.rate; st.rate = 0.6; all(); st.rate = o; };
+    all(); $('#ngGo').onclick = () => { Q.i = 0; showNghe(); }; return;
+  }
+  if (Q.i >= L.length) {
+    const pct = Math.round(Q.score / L.length * 100);
+    S.ng = S.ng || {}; S.ng[x.key] = Math.max(pct, S.ng[x.key] || 0); bump(); save();
+    body.innerHTML = `<div style="text-align:center;margin:8px 0 12px"><h2>${Q.score} / ${L.length} câu đúng · ${pct}%</h2><button class="btn" id="ngAll">🔊 Nghe lại cả đoạn (giờ đã hiểu nghĩa)</button></div><div class="dlg">${L.map((l, j) => `<div class="bubble ${l[0] === 'B' ? 'b' : ''}"><div class="who">${esc(l[1])} ${Q.ans[j] ? '✓' : '✗'}</div><div class="jp">${esc(l[2])}</div>${l[3] && l[3] !== l[2] ? `<div class="small">${esc(l[3])}</div>` : ''}${ST().romaji && l[5] ? `<div class="small muted">${esc(l[5])}</div>` : ''}<div class="small">${esc(l[4])}</div></div>`).join('')}</div>`;
+    foot.innerHTML = `<div class="row" style="width:100%;flex-wrap:nowrap"><button class="btn" id="ngAgain" style="flex:1">Nghe lại từ đầu</button><button class="btn pri" id="ngNx" style="flex:1">Đoạn tiếp ›</button></div>`;
+    $('#ngAll').onclick = all; $('#ngAgain').onclick = () => startNghe(x.key);
+    $('#ngNx').onclick = () => { const nx = NG_D[NG_D.findIndex(y => y.key === x.key) + 1]; if (nx) startNghe(nx.key); else endSession(); };
+    return;
+  }
+  const l = L[Q.i], opts = Q.opts || (Q.opts = ngOpts(x, Q.i));
+  body.innerHTML = `<div class="card" style="flex:0 0 auto;min-height:200px;cursor:default"><div class="hint">Câu ${Q.i + 1} · ${esc(l[1])} nói:</div><div class="row" style="justify-content:center"><button class="btn pri" id="ngRe" style="font-size:20px;padding:16px 24px">🔊 Nghe</button><button class="btn" id="ngSlow">🐢 Chậm</button></div><div class="hint" id="ngTx" style="margin-top:10px">Nghe rồi chọn nghĩa đúng</div></div><div class="opts" style="margin-top:12px">${opts.map((o, j) => `<button class="opt" data-o="${j}">${esc(o)}</button>`).join('')}</div>`;
+  foot.innerHTML = '';
+  say(l[2]); $('#ngRe').onclick = () => say(l[2]); $('#ngSlow').onclick = () => sayAt(l[2], 0.6);
+  document.querySelectorAll('[data-o]').forEach(b => b.onclick = () => {
+    if (Q.answered) return; Q.answered = true;
+    const ok = opts[+b.dataset.o] === l[4];
+    document.querySelectorAll('[data-o]').forEach((bb, j) => { if (opts[j] === l[4]) bb.classList.add('ok'); else if (bb === b) bb.classList.add('no'); });
+    if (ok) Q.score++; Q.ans[Q.i] = ok;
+    $('#ngTx').innerHTML = ngLine(l);
+    foot.innerHTML = `<button class="btn pri wide" id="nextQ">${ok ? 'Đúng rồi · ' : 'Chưa đúng · '}${Q.i + 1 < L.length ? 'Câu tiếp' : 'Xem kết quả'}</button>`;
+    $('#nextQ').onclick = () => { Q.answered = false; Q.opts = null; Q.i++; showNghe(); };
+  });
+}
 
 /* ================= Luyện viết (dữ liệu nét chữ KanjiVG, CC BY-SA) ================= */
 let NET = null, NETP = null;
