@@ -412,7 +412,7 @@ async function flush(){
   const todo = [...dirty]; dirty.clear();
   for (const name of todo) {
     try {
-      if (name === 'meta') await REM.doc('meta').set({settings:S.meta.settings, daily:S.meta.daily, streak:S.meta.streak, hist:S.meta.hist || {}, wr:S.wr || {}, sp:S.sp || {}, ng:S.ng || {}, updated:S.meta.updated});
+      if (name === 'meta') await REM.doc('meta').set({settings:S.meta.settings, daily:S.meta.daily, streak:S.meta.streak, hist:S.meta.hist || {}, wr:S.wr || {}, sp:S.sp || {}, ng:S.ng || {}, tt:S.tt || {}, updated:S.meta.updated});
       else { const part = {}, pm = {}; for (const [id, c] of Object.entries(S.cards)) if (shardOf(id) === name) part[id] = c; for (const [id, c] of Object.entries(S.mk)) if (shardOf(id) === name) pm[id] = c; await REM.doc(name).set({cards:part, mk:pm}); }
     } catch (e) { dirty.add(name); }
   }
@@ -431,7 +431,7 @@ async function initSync(){
     for (const d of snap.docs) {
       const body = d.data(); if (!body) continue;
       if (d.id === 'meta') {
-        if ((body.updated || 0) > (S.meta.updated || 0)) { S.meta.settings = {...DEFAULTS, ...body.settings}; S.meta.streak = body.streak || S.meta.streak; if (body.hist) S.meta.hist = body.hist; if (body.wr) S.wr = Object.assign({}, body.wr, S.wr || {}); if (body.sp) { S.sp = S.sp || {}; for (const [k2, v2] of Object.entries(body.sp)) S.sp[k2] = Math.max(v2, S.sp[k2] || 0); } if (body.ng) { S.ng = S.ng || {}; for (const [k2, v2] of Object.entries(body.ng)) S.ng[k2] = Math.max(v2, S.ng[k2] || 0); } if (body.daily && body.daily.day === dayNum()) S.meta.daily = body.daily; changed = true; }
+        if ((body.updated || 0) > (S.meta.updated || 0)) { S.meta.settings = {...DEFAULTS, ...body.settings}; S.meta.streak = body.streak || S.meta.streak; if (body.hist) S.meta.hist = body.hist; if (body.wr) S.wr = Object.assign({}, body.wr, S.wr || {}); if (body.sp) { S.sp = S.sp || {}; for (const [k2, v2] of Object.entries(body.sp)) S.sp[k2] = Math.max(v2, S.sp[k2] || 0); } if (body.tt) { S.tt = S.tt || {}; for (const [k2, v2] of Object.entries(body.tt)) S.tt[k2] = Math.max(v2, S.tt[k2] || 0); } if (body.ng) { S.ng = S.ng || {}; for (const [k2, v2] of Object.entries(body.ng)) S.ng[k2] = Math.max(v2, S.ng[k2] || 0); } if (body.daily && body.daily.day === dayNum()) S.meta.daily = body.daily; changed = true; }
       } else {
         for (const [id, c] of Object.entries(body.cards || {})) { const mine = S.cards[id]; if (!mine || (c[5] || 0) > (mine[5] || 0)) { S.cards[id] = c; changed = true; } }
         for (const [id, c] of Object.entries(body.mk || {})) { const mine = S.mk[id]; if (!mine || (c[1] || 0) > (mine[1] || 0)) { S.mk[id] = c; changed = true; } }
@@ -1100,7 +1100,7 @@ views['hoc'] = () => {
     ${soon('文', 'Ngữ pháp', 'N5 → N1')}
     ${soon('読', 'Đọc hiểu', 'Bài đọc + câu hỏi')}
     ${mod('#nghe-hieu', '聴', 'Nghe hiểu', NG_D.length + ' đoạn hội thoại', Object.keys(S.ng || {}).length ? Object.keys(S.ng).length + ' đoạn' : '')}
-    ${soon('試', 'Thi thử JLPT', 'Đề theo cấp')}
+    ${mod('#thi-thu', '試', 'Thi thử JLPT', '30 câu · đề mới mỗi lần', Object.keys(S.tt || {}).length ? Object.keys(S.tt).length + ' cấp' : '')}
   </div>
   <h3>Ôn tập</h3>
   <div class="mods">
@@ -1254,6 +1254,88 @@ views['luyen-noi'].after = () => {
   $('#spAll').onclick = () => openSpeak(spPool().map(spItem), 0, title());
   $('#spTodo').onclick = () => { const todo = spPool().filter(id => ((S.sp || {})[id] || 0) < 80); if (!todo.length) toast('Đã đạt hết phần này'); else openSpeak(todo.map(spItem), 0, title()); };
 };
+
+/* ================= Thi thử JLPT (ghép từ kho từ vựng có sẵn) ================= */
+const TT_SEC = [['doc', 'Đọc kanji', 8], ['viet', 'Viết kanji', 7], ['nghia', 'Nghĩa từ', 8], ['nghe', 'Nghe', 7]];
+const TT_MIN = {N5:20, N4:25, N3:30, N2:30, N1:30};
+views['thi-thu'] = () => {
+  const lv = vstate.ttLv || 'N5', tt = S.tt || {};
+  return `<h2>Thi thử JLPT</h2><p class="sub">Mỗi lần bấm là một đề mới 30 câu lấy từ kho từ vựng đúng cấp: đọc kanji, viết kanji, nghĩa từ, nghe. Làm như thi thật: chọn xong là sang câu sau, cuối bài mới chấm.</p>
+  <div class="chips">${LV_V.map(l => `<button class="chip ${lv === l ? 'on' : ''}" data-ttl="${l}">${l}${tt[l] != null ? ' · ' + tt[l] + '%' : ''}</button>`).join('')}</div>
+  <div class="panel" style="margin-top:10px"><b>Đề ${lv}</b> · 30 câu · gợi ý ${TT_MIN[lv]} phút<div class="small muted" style="margin-top:6px">${TT_SEC.map(x => x[1] + ' ' + x[2] + ' câu').join(' · ')}</div><div class="small muted" style="margin-top:6px">Đạt khi tổng từ 60% và phần nào cũng từ 40% (giống luật điểm liệt của JLPT).</div>${tt[lv] != null ? `<div style="margin-top:6px">Điểm cao nhất: <b>${tt[lv]}%</b></div>` : ''}</div>
+  <div class="row" style="margin:12px 0"><button class="btn pri" id="ttGo">📝 Làm đề ${lv}</button></div>
+  <p class="small muted">Chưa có phần ngữ pháp và bài đọc (sẽ thêm sau khi app có bài ngữ pháp, đọc hiểu).</p>`;
+};
+views['thi-thu'].after = () => {
+  document.querySelectorAll('[data-ttl]').forEach(b => b.onclick = () => { vstate.ttLv = b.dataset.ttl; saveUi(); route(); });
+  $('#ttGo').onclick = () => startThi(vstate.ttLv || 'N5');
+};
+function ttPick(pool, x, key, n){
+  const v = key(x), L = [...v].length;
+  const share = shuffle(pool.filter(y => y !== x && key(y) !== v && [...y.w].some(ch => KMAP.has(ch) && x.w.includes(ch))));
+  const near = shuffle(pool.filter(y => y !== x && key(y) !== v && Math.abs([...key(y)].length - L) <= 1));
+  const out = [];
+  for (const y of share.concat(near, shuffle(pool.slice()))) { if (out.length >= n) break; if (y !== x && key(y) !== v && !out.some(o => key(o) === key(y))) out.push(y); }
+  return out;
+}
+function startThi(lv){
+  const all = V.filter(x => x.lv === lv && x.vi), kan = all.filter(x => hasKanji(x.w) && x.r && x.r !== x.w);
+  if (kan.length < 40) { toast('Cấp này chưa đủ từ để ra đề'); return; }
+  const used = new Set(), take = (pool, n) => shuffle(pool.filter(x => !used.has(x.id)).slice()).slice(0, n).map(x => { used.add(x.id); return x; });
+  const qs = [];
+  for (const [sec, , n] of TT_SEC) {
+    const src = sec === 'doc' || sec === 'viet' ? kan : all;
+    for (const x of take(src, n)) {
+      const key = sec === 'doc' ? (y => y.r) : sec === 'viet' ? (y => y.w) : (y => y.vi);
+      const wrong = ttPick(sec === 'doc' || sec === 'viet' ? kan : all, x, key, 3);
+      qs.push({sec, x, opts:shuffle([x, ...wrong]).map(key), right:key(x)});
+    }
+  }
+  SES = {quiz:true, thi:true, lv, qs, i:0, pick:[], t0:Date.now()};
+  $('#study').hidden = false; document.body.style.overflow = 'hidden'; showThi();
+}
+const ttClock = () => { const s2 = Math.floor((Date.now() - SES.t0) / 1000); return Math.floor(s2 / 60) + ':' + String(s2 % 60).padStart(2, '0'); };
+let ttTimer = null;
+function showThi(){
+  const Q = SES, body = $('#sBody'), foot = $('#sFoot');
+  clearInterval(ttTimer);
+  $('#sBar').style.width = (Q.i / Q.qs.length * 100) + '%'; $('#sCount').textContent = Q.i + ' / ' + Q.qs.length;
+  if (Q.i >= Q.qs.length) return thiResult();
+  const q = Q.qs[Q.i], secName = TT_SEC.find(x => x[0] === q.sec)[1];
+  const ask = q.sec === 'doc' ? `<div class="big ${sizeCls(q.x.w)}">${esc(q.x.w)}</div><div class="hint">Chữ này đọc là gì?</div>`
+    : q.sec === 'viet' ? `<div class="big ${sizeCls(q.x.r)}">${esc(q.x.r)}</div><div class="hint">Viết bằng chữ Hán thế nào?</div>`
+    : q.sec === 'nghia' ? `<div class="big ${sizeCls(q.x.w)}">${esc(q.x.w)}</div><div class="hint">Nghĩa là gì?</div>`
+    : `<button class="btn pri" id="ttRe" style="font-size:20px;padding:16px 24px">🔊 Nghe</button><div class="hint">Nghe rồi chọn nghĩa đúng</div>`;
+  body.innerHTML = `<div class="small muted" style="display:flex;justify-content:space-between"><span>Đề ${Q.lv} · ${secName}</span><span id="ttClk">⏱ ${ttClock()} / ${TT_MIN[Q.lv]}:00</span></div><div class="card" style="flex:0 0 auto;min-height:190px;cursor:default;margin-top:6px">${ask}</div><div class="opts" style="margin-top:12px">${q.opts.map((o, j) => `<button class="opt ${q.sec === 'doc' || q.sec === 'viet' ? 'jp' : ''}" data-o="${j}" style="${q.sec === 'doc' || q.sec === 'viet' ? 'font-size:20px' : ''}">${j + 1}. ${esc(o)}</button>`).join('')}</div>`;
+  foot.innerHTML = Q.i ? '<button class="btn wide" id="ttBack">‹ Câu trước</button>' : '';
+  ttTimer = setInterval(() => { const c = $('#ttClk'); if (!c || !SES || !SES.thi) return clearInterval(ttTimer); c.textContent = '⏱ ' + ttClock() + ' / ' + TT_MIN[Q.lv] + ':00'; }, 1000);
+  if (q.sec === 'nghe') { say(q.x.r); $('#ttRe').onclick = () => say(q.x.r); }
+  if (Q.pick[Q.i] != null) { const b0 = document.querySelector(`[data-o="${Q.pick[Q.i]}"]`); if (b0) b0.style.outline = '2px solid var(--ai)'; }
+  if ($('#ttBack')) $('#ttBack').onclick = () => { Q.i--; showThi(); };
+  document.querySelectorAll('[data-o]').forEach(b => b.onclick = () => {
+    Q.pick[Q.i] = +b.dataset.o; b.style.outline = '2px solid var(--ai)';
+    setTimeout(() => { if (SES === Q) { Q.i++; showThi(); } }, 220);
+  });
+}
+function thiResult(){
+  const Q = SES, body = $('#sBody'), foot = $('#sFoot');
+  clearInterval(ttTimer);
+  const okOf = (q, j) => Q.pick[j] != null && q.opts[Q.pick[j]] === q.right;
+  const secs = TT_SEC.map(([k, n]) => { const qq = Q.qs.map((q, j) => [q, j]).filter(([q]) => q.sec === k); const ok = qq.filter(([q, j]) => okOf(q, j)).length; return {k, n, ok, tot:qq.length, pct:qq.length ? Math.round(ok / qq.length * 100) : 0}; });
+  const ok = Q.qs.filter(okOf).length, pct = Math.round(ok / Q.qs.length * 100), pass = pct >= 60 && secs.every(x => x.pct >= 40);
+  const wrong = Q.qs.map((q, j) => [q, j]).filter(([q, j]) => !okOf(q, j));
+  if (!Q.saved) {
+    Q.saved = true; Q.time = ttClock();
+    S.tt = S.tt || {}; S.tt[Q.lv] = Math.max(pct, S.tt[Q.lv] || 0);
+    wrong.forEach(([q]) => markOnly(q.x.id, false)); bump(Q.qs.length); save(wrong.map(([q]) => q.x.id));
+  }
+  body.innerHTML = `<div style="text-align:center;margin:6px 0 12px"><div class="big s2">${pass ? '🎉' : '📝'}</div><h2>${pass ? 'ĐẠT' : 'Chưa đạt'} · ${ok} / ${Q.qs.length} câu · ${pct}%</h2><div class="small muted">Đề ${Q.lv} · làm trong ${Q.time}</div></div>
+  <div class="panel">${secs.map(x => `<div style="margin:4px 0">${esc(x.n)}: <b>${x.ok}/${x.tot}</b> · ${x.pct}%${x.pct < 40 ? ' <span style="color:var(--again)">(dưới 40% — liệt)</span>' : ''}<div class="bar"><i style="width:${x.pct}%"></i></div></div>`).join('')}</div>
+  ${wrong.length ? `<h3>Câu sai (${wrong.length}) — đã đưa vào “Chưa thuộc” của Lật thẻ</h3><div style="display:grid;gap:8px">${wrong.map(([q, j]) => `<div class="panel" style="padding:10px 12px"><div class="small muted">${esc(TT_SEC.find(x => x[0] === q.sec)[1])}</div><div><span class="jp" style="font-size:20px">${esc(q.x.w)}</span>${q.x.r !== q.x.w ? ` <span class="jp">${esc(q.x.r)}</span>` : ''} ${sayBtn(q.x.r)}</div><div>${esc(q.x.vi)}</div><div class="small">Bạn chọn: <span style="color:var(--again)">${Q.pick[j] == null ? '(bỏ trống)' : esc(q.opts[Q.pick[j]])}</span> · Đúng: <span style="color:var(--good)">${esc(q.right)}</span></div></div>`).join('')}</div>` : '<p style="text-align:center">Không sai câu nào 👏</p>'}`;
+  foot.innerHTML = `<div class="row" style="width:100%;flex-wrap:nowrap">${wrong.length ? '<button class="btn" id="ttFl" style="flex:1">Lật thẻ câu sai</button>' : ''}<button class="btn pri" id="ttNew" style="flex:1">Đề mới</button></div>`;
+  $('#ttNew').onclick = () => startThi(Q.lv);
+  if ($('#ttFl')) $('#ttFl').onclick = () => { const ids = wrong.map(([q]) => q.x.id); endSession(); openFlash(ids, 'Câu sai đề ' + Q.lv); };
+}
 
 /* ================= Nghe hiểu (từ hội thoại mẫu có sẵn) ================= */
 const NG_D = []; P.forEach((s2, si) => s2.dialogs.forEach((d, di) => NG_D.push({key:si + '_' + di, si, di, s:s2, d})));
