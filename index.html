@@ -412,7 +412,7 @@ async function flush(){
   const todo = [...dirty]; dirty.clear();
   for (const name of todo) {
     try {
-      if (name === 'meta') await REM.doc('meta').set({settings:S.meta.settings, daily:S.meta.daily, streak:S.meta.streak, hist:S.meta.hist || {}, wr:S.wr || {}, sp:S.sp || {}, ng:S.ng || {}, tt:S.tt || {}, updated:S.meta.updated});
+      if (name === 'meta') await REM.doc('meta').set({settings:S.meta.settings, daily:S.meta.daily, streak:S.meta.streak, hist:S.meta.hist || {}, wr:S.wr || {}, sp:S.sp || {}, ng:S.ng || {}, tt:S.tt || {}, lt:S.lt || {}, updated:S.meta.updated});
       else { const part = {}, pm = {}; for (const [id, c] of Object.entries(S.cards)) if (shardOf(id) === name) part[id] = c; for (const [id, c] of Object.entries(S.mk)) if (shardOf(id) === name) pm[id] = c; await REM.doc(name).set({cards:part, mk:pm}); }
     } catch (e) { dirty.add(name); }
   }
@@ -431,7 +431,7 @@ async function initSync(){
     for (const d of snap.docs) {
       const body = d.data(); if (!body) continue;
       if (d.id === 'meta') {
-        if ((body.updated || 0) > (S.meta.updated || 0)) { S.meta.settings = {...DEFAULTS, ...body.settings}; S.meta.streak = body.streak || S.meta.streak; if (body.hist) S.meta.hist = body.hist; if (body.wr) S.wr = Object.assign({}, body.wr, S.wr || {}); if (body.sp) { S.sp = S.sp || {}; for (const [k2, v2] of Object.entries(body.sp)) S.sp[k2] = Math.max(v2, S.sp[k2] || 0); } if (body.tt) { S.tt = S.tt || {}; for (const [k2, v2] of Object.entries(body.tt)) S.tt[k2] = Math.max(v2, S.tt[k2] || 0); } if (body.ng) { S.ng = S.ng || {}; for (const [k2, v2] of Object.entries(body.ng)) S.ng[k2] = Math.max(v2, S.ng[k2] || 0); } if (body.daily && body.daily.day === dayNum()) S.meta.daily = body.daily; changed = true; }
+        if ((body.updated || 0) > (S.meta.updated || 0)) { S.meta.settings = {...DEFAULTS, ...body.settings}; S.meta.streak = body.streak || S.meta.streak; if (body.hist) S.meta.hist = body.hist; if (body.wr) S.wr = Object.assign({}, body.wr, S.wr || {}); if (body.sp) { S.sp = S.sp || {}; for (const [k2, v2] of Object.entries(body.sp)) S.sp[k2] = Math.max(v2, S.sp[k2] || 0); } if (body.lt) { S.lt = S.lt || {}; for (const [k2, v2] of Object.entries(body.lt)) S.lt[k2] = Math.max(v2, S.lt[k2] || 0); } if (body.tt) { S.tt = S.tt || {}; for (const [k2, v2] of Object.entries(body.tt)) S.tt[k2] = Math.max(v2, S.tt[k2] || 0); } if (body.ng) { S.ng = S.ng || {}; for (const [k2, v2] of Object.entries(body.ng)) S.ng[k2] = Math.max(v2, S.ng[k2] || 0); } if (body.daily && body.daily.day === dayNum()) S.meta.daily = body.daily; changed = true; }
       } else {
         for (const [id, c] of Object.entries(body.cards || {})) { const mine = S.cards[id]; if (!mine || (c[5] || 0) > (mine[5] || 0)) { S.cards[id] = c; changed = true; } }
         for (const [id, c] of Object.entries(body.mk || {})) { const mine = S.mk[id]; if (!mine || (c[1] || 0) > (mine[1] || 0)) { S.mk[id] = c; changed = true; } }
@@ -833,10 +833,10 @@ document.addEventListener('keydown', e => {
 const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const qText = x => deckOf(x.id) === 'v' ? x.w : deckOf(x.id) === 'k' ? x.k : x.jp;
 const aText = x => deckOf(x.id) === 'k' ? x.vi + ' (' + x.hv + ')' : x.vi;
-function startQuiz(ids, title, mode){
+function startQuiz(ids, title, mode, n){
   const pool = ids.map(id => BY.get(id)).filter(x => x && (x.vi));
   if (pool.length < 4) { toast('Cần ít nhất 4 thẻ để làm trắc nghiệm'); return; }
-  const qs = shuffle(pool.slice()).slice(0, Math.min(10, pool.length)).map(x => {
+  const qs = shuffle(pool.slice()).slice(0, Math.min(n || 10, pool.length)).map(x => {
     const same = pool.filter(y => y.id !== x.id && aText(y) !== aText(x));
     const wrong = shuffle(same.slice()).slice(0, 3);
     return {x, opts:shuffle([x, ...wrong]), rev:Math.random() < 0.3};
@@ -849,6 +849,7 @@ function showQ(){
   const Q = SES, body = $('#sBody'), foot = $('#sFoot');
   $('#sBar').style.width = (Q.i / Q.qs.length * 100) + '%'; $('#sCount').textContent = (Q.i) + ' / ' + Q.qs.length;
   if (Q.i >= Q.qs.length) {
+    if (Q.onDone && !Q.fired) { Q.fired = true; Q.onDone(Q.score, Q.qs.length); }
     body.innerHTML = `<div class="empty" style="margin:auto"><div class="big s2">${Q.score >= Q.qs.length * 0.8 ? '🎯' : '📝'}</div><h2>${Q.score} / ${Q.qs.length} câu đúng</h2>${Q.wrong.length ? `<p>Các thẻ trả lời sai đã được đưa vào ôn hôm nay:</p><div class="list" style="text-align:left">${Q.wrong.map(x => `<div class="item"><div class="w">${esc(qText(x))}</div><div class="m">${esc(aText(x))}</div></div>`).join('')}</div>` : '<p>Không sai câu nào.</p>'}</div>`;
     foot.innerHTML = '<button class="btn pri wide" id="sEnd">Xong</button>'; $('#sEnd').onclick = endSession; return;
   }
@@ -878,7 +879,7 @@ function startKanaQuiz(set){
   const show = () => {
     const Q = SES, body = $('#sBody'), foot = $('#sFoot');
     $('#sBar').style.width = (Q.i / Q.qs.length * 100) + '%'; $('#sCount').textContent = Q.i + ' / ' + Q.qs.length;
-    if (Q.i >= Q.qs.length) { body.innerHTML = `<div class="empty" style="margin:auto"><h2>${Q.score} / ${Q.qs.length} đúng</h2>${Q.wrong.length ? `<p>Ôn lại: <span class="jp" style="font-size:24px">${Q.wrong.map(c => (kat ? h2k(c) : c) + ' ' + romaji(c)).join(' · ')}</span></p>` : '<p>Tuyệt, không sai chữ nào.</p>'}</div>`; foot.innerHTML = '<button class="btn pri wide" id="sEnd">Xong</button>'; $('#sEnd').onclick = endSession; return; }
+    if (Q.i >= Q.qs.length) { if (Q.onDone && !Q.fired) { Q.fired = true; Q.onDone(Q.score, Q.qs.length); } body.innerHTML = `<div class="empty" style="margin:auto"><h2>${Q.score} / ${Q.qs.length} đúng</h2>${Q.wrong.length ? `<p>Ôn lại: <span class="jp" style="font-size:24px">${Q.wrong.map(c => (kat ? h2k(c) : c) + ' ' + romaji(c)).join(' · ')}</span></p>` : '<p>Tuyệt, không sai chữ nào.</p>'}</div>`; foot.innerHTML = '<button class="btn pri wide" id="sEnd">Xong</button>'; $('#sEnd').onclick = endSession; return; }
     const q = Q.qs[Q.i];
     body.innerHTML = `<div class="card" style="flex:0 0 auto;min-height:220px;cursor:default"><div class="big s1">${kat ? h2k(q.c) : q.c}</div><div class="hint">Đọc là gì?</div></div><div class="opts" style="margin-top:12px;grid-template-columns:1fr 1fr">${q.opts.map((o, j) => `<button class="opt" style="text-align:center;font-size:20px" data-o="${j}">${romaji(o)}</button>`).join('')}</div>`;
     foot.innerHTML = '';
@@ -1083,6 +1084,7 @@ views['hoc'] = () => {
   <div class="stat" style="margin-bottom:14px"><div><b>${streak}</b><span>ngày liên tiếp</span></div><div><b>${known.toLocaleString('vi-VN')}</b><span>thẻ đã thuộc</span></div><div><b>${todayN}</b><span>thẻ cần ôn hôm nay</span></div></div>
   <h3>Nền tảng</h3>
   <div class="mods">
+    ${mod('#lo-trinh', '道', 'Lộ trình 50 bài', 'Học theo thứ tự · N5 → N4', ltDoneN() ? ltDoneN() + '/50 bài' : '')}
     ${mod('#chu-cai', 'あ', 'Bảng chữ cái', 'Hiragana · Katakana · nghe · kiểm tra')}
     ${mod('#luyen-viet', '書', 'Luyện viết', 'Tô theo thứ tự nét', wr ? wr + ' chữ' : '')}
     ${mod('#lat-the', '札', 'Lật thẻ', 'Lướt · xem lại thuộc / chưa thuộc')}
@@ -1254,6 +1256,83 @@ views['luyen-noi'].after = () => {
   $('#spAll').onclick = () => openSpeak(spPool().map(spItem), 0, title());
   $('#spTodo').onclick = () => { const todo = spPool().filter(id => ((S.sp || {})[id] || 0) < 80); if (!todo.length) toast('Đã đạt hết phần này'); else openSpeak(todo.map(spItem), 0, title()); };
 };
+
+/* ================= Lộ trình 50 bài (chia sẵn từ kho có sẵn) ================= */
+const LT_KANA = [
+  ['h', 'base', 'Hiragana cơ bản', '46 chữ あ → ん'],
+  ['h', 'daku', 'Hiragana có dấu', 'が ざ だ ば ぱ (dấu ゛ ゜)'],
+  ['h', 'yoon', 'Hiragana âm ghép', 'きゃ しゅ ちょ … + っ nhỏ'],
+  ['k', 'base', 'Katakana cơ bản', '46 chữ ア → ン (từ nước ngoài)'],
+  ['k', 'daku', 'Katakana có dấu', 'ガ ザ ダ バ パ + trường âm ー'],
+];
+const LT = (() => {
+  const out = LT_KANA.map((x, i) => ({n:i + 1, kana:true, kset:x[0], set:x[1], title:x[2], sub:x[3], lv:'Chữ cái'}));
+  const tOrd = new Map(TOPICS.map((t, i) => [t[0], i]));
+  const words = ['N5', 'N4'].flatMap(lv => V.filter(x => x.lv === lv).sort((a, b) => (tOrd.get(a.tp) ?? 99) - (tOrd.get(b.tp) ?? 99) || a.id.localeCompare(b.id)));
+  const kans = ['N5', 'N4'].flatMap(lv => K.filter(x => x.lv === lv));
+  const NL = 45, cut = (arr, j, m) => arr.slice(Math.round(arr.length * j / m), Math.round(arr.length * (j + 1) / m));
+  const sit = j => Math.floor(j * P.length / NL);
+  for (let j = 0; j < NL; j++) {
+    const si = sit(j), share = [...Array(NL).keys()].filter(t => sit(t) === si), pos = share.indexOf(j);
+    const w = cut(words, j, NL), k = cut(kans, j, NL);
+    const ph = cut(PH.filter(x => x.si === si), pos, share.length).map(x => x.id);
+    const dl = cut(P[si].dialogs.map((d, di) => si + '_' + di), pos, share.length);
+    const cnt = {}; w.forEach(x => { cnt[x.tp] = (cnt[x.tp] || 0) + 1; });
+    const top = Object.entries(cnt).sort((a, b) => b[1] - a[1])[0][0];
+    const tName = (TOPICS.find(t => t[0] === top) || [, ''])[1];
+    const n5 = w.filter(x => x.lv === 'N5').length;
+    out.push({n:j + 6, v:w.map(x => x.id), k:k.map(x => x.id), p:ph, d:dl, si, title:tName, sub:P[si].title + (share.length > 1 ? ' (' + (pos + 1) + '/' + share.length + ')' : ''), lv:n5 * 2 >= w.length ? 'N5' : 'N4'});
+  }
+  return out;
+})();
+const ltScore = n => (S.lt || {})[n];
+const ltDone = n => (ltScore(n) || 0) >= 80;
+const ltDoneN = () => LT.filter(b => ltDone(b.n)).length;
+const ltKnown = ids => ids.filter(id => S.mk[id] && S.mk[id][0] === 1).length;
+function ltSave(n, score, tot){ const pct = Math.round(score / tot * 100); S.lt = S.lt || {}; S.lt[n] = Math.max(pct, S.lt[n] || 0); bump(); save(); if (pct >= 80) toast('Bài ' + n + ' hoàn thành ✓'); else toast('Cần từ 80% để qua bài — làm lại nhé'); }
+views['lo-trinh'] = () => {
+  const cur = LT.find(b => !ltDone(b.n)) || LT[LT.length - 1], done = ltDoneN();
+  const grp = [['Chữ cái', 'Bài 1–5 · đọc và viết được hai bảng chữ'], ['N5', 'Từ, kanji, câu giao tiếp cơ bản'], ['N4', 'Mở rộng đời sống, công việc']];
+  return `<h2>Lộ trình 50 bài</h2><p class="sub">Học theo thứ tự, mỗi bài 15–25 phút: từ mới → kanji → câu giao tiếp → nghe → kiểm tra. Kiểm tra từ 80% là qua bài. Học hết 50 bài ≈ xong N5 + N4.</p>
+  <div class="panel">${done} / ${LT.length} bài đã qua<div class="bar"><i style="width:${(done / LT.length * 100).toFixed(1)}%"></i></div></div>
+  <div class="row" style="margin:10px 0"><a class="btn pri" href="#bai-${cur.n}">▶ Học tiếp: Bài ${cur.n} · ${esc(cur.title)}</a></div>
+  ${grp.map(([g, gs]) => `<h3>${g === 'Chữ cái' ? 'Chữ cái' : g} <span class="small muted" style="font-weight:400">${gs}</span></h3><div style="display:grid;gap:8px">${LT.filter(b => b.lv === g).map(b => { const sc = ltScore(b.n); return `<a class="opt" href="#bai-${b.n}" style="display:flex;gap:10px;align-items:center;text-decoration:none;color:inherit;${b === cur ? 'border-color:var(--ai)' : ''}"><b style="min-width:2.2em;text-align:center">${ltDone(b.n) ? '✅' : b.n}</b><span style="flex:1;min-width:0"><b>Bài ${b.n} · ${esc(b.title)}</b><br><span class="small muted">${esc(b.sub)}${b.kana ? '' : ' · ' + b.v.length + ' từ · ' + b.k.length + ' kanji'}</span></span><span class="small" style="white-space:nowrap;color:${(sc || 0) >= 80 ? 'var(--good)' : 'var(--muted)'}">${sc == null ? '' : sc + '%'}</span></a>`; }).join('')}</div>`).join('')}`;
+};
+function ltStep(ic, name, info, btns, ok){ return `<div class="panel" style="display:flex;gap:10px;align-items:center;margin-bottom:8px"><span style="font-size:22px;min-width:1.4em;text-align:center">${ok ? '✅' : ic}</span><div style="flex:1;min-width:0"><b>${name}</b><div class="small muted">${info}</div></div><div class="row" style="gap:6px;justify-content:flex-end">${btns}</div></div>`; }
+LT.forEach(b => {
+  const name = 'bai-' + b.n, title = 'Bài ' + b.n + ' · ' + b.title;
+  views[name] = () => {
+    const sc = ltScore(b.n), nav = `<div class="row" style="justify-content:space-between;margin-top:14px">${b.n > 1 ? `<a class="btn" href="#bai-${b.n - 1}">‹ Bài ${b.n - 1}</a>` : '<span></span>'}${b.n < LT.length ? `<a class="btn ${ltDone(b.n) ? 'pri' : ''}" href="#bai-${b.n + 1}">Bài ${b.n + 1} ›</a>` : ''}</div>`;
+    const head = `<p class="small" style="margin:6px 0 0"><a href="#lo-trinh" style="color:var(--ai)">‹ Lộ trình</a></p><h2>${esc(title)}</h2><p class="sub">${esc(b.sub)}</p>`;
+    const test = ltStep('試', 'Kiểm tra', sc == null ? (b.kana ? '20 câu đọc chữ' : '20 câu từ + kanji của bài') + ' · cần từ 80%' : 'Điểm cao nhất ' + sc + '%' + (sc >= 80 ? ' · đã qua bài' : ' · cần từ 80%'), '<button class="btn pri" id="ltTest">Làm bài</button>', sc >= 80);
+    if (b.kana) return head + ltStep('あ', '1. Xem bảng chữ + nghe', 'Bấm từng chữ để nghe, đọc theo', '<button class="btn" id="ltTable">Mở bảng</button>') + ltStep('書', '2. Tập viết', 'Tô theo thứ tự nét', '<button class="btn" id="ltWrite">Tập viết</button>') + test + nav;
+    const kv = ltKnown(b.v), kk = ltKnown(b.k), kp = ltKnown(b.p), ng = S.ng || {}, nd = b.d.filter(k => (ng[k] || 0) >= 80).length;
+    const wl = b.v.map(id => BY.get(id)).map(x => `<div style="padding:4px 0;border-bottom:1px solid var(--line)"><span class="jp">${esc(x.w)}</span>${x.r !== x.w ? ` <span class="small muted jp">${esc(x.r)}</span>` : ''} — <span class="small">${esc(x.vi)}</span></div>`).join('');
+    return head
+      + ltStep('語', '1. Từ mới', b.v.length + ' từ · đã thuộc ' + kv, '<button class="btn" id="ltV">Lật thẻ</button>', kv >= b.v.length * 0.8)
+      + `<details style="margin:-2px 0 10px"><summary class="small muted" style="cursor:pointer">Xem danh sách ${b.v.length} từ</summary><div style="margin-top:6px">${wl}</div></details>`
+      + ltStep('字', '2. Kanji', b.k.map(id => BY.get(id).k).join(' ') + ' · đã thuộc ' + kk + '/' + b.k.length, '<button class="btn" id="ltK">Lật thẻ</button><button class="btn" id="ltKW">✍</button>', b.k.length && kk >= b.k.length * 0.8)
+      + ltStep('話', '3. Câu giao tiếp', b.p.length + ' câu · ' + esc(P[b.si].title) + ' · đã thuộc ' + kp, '<button class="btn" id="ltP">Lật thẻ</button><button class="btn" id="ltSp">🎤</button>', b.p.length && kp >= b.p.length * 0.8)
+      + (b.d.length ? ltStep('聴', '4. Nghe hội thoại', b.d.length + ' đoạn · đạt ' + nd, b.d.map((k, i) => `<button class="btn" data-ltd="${k}">Đoạn ${i + 1}${ng[k] != null ? ' · ' + ng[k] + '%' : ''}</button>`).join(''), nd === b.d.length) : '')
+      + test + nav;
+  };
+  views[name].after = () => {
+    const t = $('#ltTest');
+    if (b.kana) {
+      $('#ltTable').onclick = () => { vstate.kana = b.kset; saveUi(); location.hash = 'chu-cai'; };
+      $('#ltWrite').onclick = () => { vstate.wSet = b.kset; saveUi(); location.hash = 'luyen-viet'; };
+      t.onclick = () => { vstate.kana = b.kset; saveUi(); startKanaQuiz(b.set); SES.onDone = (sc, tot) => ltSave(b.n, sc, tot); };
+      return;
+    }
+    $('#ltV').onclick = () => openFlash(b.v, title + ' · từ');
+    $('#ltK').onclick = () => openFlash(b.k, title + ' · kanji');
+    $('#ltKW').onclick = () => startWrite(b.k.map(id => BY.get(id).k), 0);
+    $('#ltP').onclick = () => openFlash(b.p, title + ' · câu');
+    $('#ltSp').onclick = () => openSpeak(b.p.map(spItem), 0, title);
+    document.querySelectorAll('[data-ltd]').forEach(x => x.onclick = () => startNghe(x.dataset.ltd));
+    t.onclick = () => { startQuiz(b.v.concat(b.k), title + ' · kiểm tra', 'nghia', 20); if (SES) SES.onDone = (sc, tot) => ltSave(b.n, sc, tot); };
+  };
+});
 
 /* ================= Thi thử JLPT (ghép từ kho từ vựng có sẵn) ================= */
 const TT_SEC = [['doc', 'Đọc kanji', 8], ['viet', 'Viết kanji', 7], ['nghia', 'Nghĩa từ', 8], ['nghe', 'Nghe', 7]];
